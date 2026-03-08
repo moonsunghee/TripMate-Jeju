@@ -88,10 +88,28 @@ NAVER_CLIENT_ID=
 
 ```
 TripMate-Jeju/
-├── frontend/         # Next.js
-├── backend/          # FastAPI
+├── frontend/                  # Next.js 웹 프론트
+│   ├── app/                   # Next.js App Router
+│   ├── components/            # 공통 컴포넌트
+│   ├── lib/                   # API 호출, 유틸
+│   ├── public/                # 정적 파일
+│   └── .env.example
+│
+├── backend/                   # FastAPI 백엔드
+│   ├── app/
+│   │   ├── api/               # 라우터 (엔드포인트)
+│   │   ├── models/            # DB 모델
+│   │   ├── schemas/           # Pydantic 스키마
+│   │   ├── services/          # 비즈니스 로직 + AI 호출
+│   │   └── core/              # 설정, DB 연결
+│   ├── main.py
+│   ├── requirements.txt
+│   └── .env.example
+│
+├── mobile/                    # Flutter (2단계)
+├── .gitignore
 ├── README.md
-└── PLANNING.md       # 프로젝트 기획서 (내부용)
+└── PLANNING.md                # 프로젝트 기획서 (내부용)
 ```
 
 ---
