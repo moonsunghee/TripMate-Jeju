@@ -3,13 +3,19 @@
 .shell {
   max-width: $mobile-max-width;
   margin: 0 auto;
-  min-height: 100vh;
+  height: 100dvh;
   background-color: $color-background;
-  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  // 노치/홈바 safe area
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 .content {
-  min-height: 100vh;
+  flex: 1;
+  overflow-y: auto;
 }
 
 .withNav {
