@@ -270,9 +270,7 @@ function PurposeStep({ form, setForm }: StepProps) {
                 className={`${styles.purposeBtn} ${selected ? styles.purposeBtnSelected : ""}`}
                 onClick={() => toggle(p)}
               >
-                <span className={styles.purposeIconWrap}>
-                  <Icon size={18} />
-                </span>
+                <Icon size={22} className={styles.purposeIcon} />
                 <span>{p}</span>
               </button>
             );
