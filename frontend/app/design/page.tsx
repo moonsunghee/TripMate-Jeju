@@ -2,7 +2,13 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { RiArrowLeftLine, RiCheckLine } from "react-icons/ri";
+import {
+  RiArrowLeftLine, RiCheckLine,
+  RiSunLine, RiCompass3Line, RiAnchorLine, RiRunLine, RiWalkLine,
+  RiHeartPulseLine, RiFlag2Line, RiDropLine, RiBikeLine,
+  RiUserSmileLine, RiGroupLine,
+} from "react-icons/ri";
+import type { IconType } from "react-icons";
 import JejuMap from "@/components/ui/JejuMap";
 import styles from "./page.module.scss";
 
@@ -42,6 +48,20 @@ const PURPOSES: TravelPurpose[] = [
   "휴양", "등산", "해양레포츠", "트레일/러닝", "제주올레",
   "웰니스", "골프", "낚시", "자전거", "가족(어린이)", "가족(부모님)",
 ];
+
+const PURPOSE_ICONS: Record<TravelPurpose, IconType> = {
+  "휴양":       RiSunLine,
+  "등산":       RiCompass3Line,
+  "해양레포츠": RiAnchorLine,
+  "트레일/러닝": RiRunLine,
+  "제주올레":   RiWalkLine,
+  "웰니스":     RiHeartPulseLine,
+  "골프":       RiFlag2Line,
+  "낚시":       RiDropLine,
+  "자전거":     RiBikeLine,
+  "가족(어린이)": RiUserSmileLine,
+  "가족(부모님)": RiGroupLine,
+};
 
 const TRANSPORTS: TransportMethod[] = ["자동차", "대중교통", "택시", "이륜차", "자전거", "도보"];
 
@@ -241,16 +261,20 @@ function PurposeStep({ form, setForm }: StepProps) {
       <div className={styles.card}>
         <StepHeader step={1} title="여행목적" desc="여행 목적을 선택해 주세요. (복수선택가능)" />
         <div className={styles.purposeList}>
-          {PURPOSES.map((p) => (
-            <button
-              key={p}
-              className={`${styles.purposeBtn} ${form.purposes.includes(p) ? styles.purposeBtnSelected : ""}`}
-              onClick={() => toggle(p)}
-            >
-              <span className={`${styles.radioCircle} ${form.purposes.includes(p) ? styles.radioSelected : ""}`} />
-              <span>{p}</span>
-            </button>
-          ))}
+          {PURPOSES.map((p) => {
+            const Icon = PURPOSE_ICONS[p];
+            const selected = form.purposes.includes(p);
+            return (
+              <button
+                key={p}
+                className={`${styles.purposeBtn} ${selected ? styles.purposeBtnSelected : ""}`}
+                onClick={() => toggle(p)}
+              >
+                <Icon size={22} className={styles.purposeIcon} />
+                <span>{p}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
     </div>
