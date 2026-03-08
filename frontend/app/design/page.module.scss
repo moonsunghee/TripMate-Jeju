@@ -1,0 +1,691 @@
+@import "../../styles/variables";
+@import "../../styles/mixins";
+
+// Figma design tokens
+$step-orange: #ff6600;
+$selected-orange: #ff9900;
+$btn-default: #e0e0e0;
+$header-bg: #f0f0f0;
+$btn-dark: #1e1e1e;
+$dropdown-bg: #efefef;
+$dropdown-border: #cccccc;
+$card-shadow: 0px 2px 10px 0px rgba(0, 0, 0, 0.25);
+
+// ============================================================
+// Page
+// ============================================================
+.page {
+  @include flex-column;
+  position: fixed;
+  inset: 0;
+  background: $color-background-gray;
+}
+
+// ============================================================
+// Header — gray #f0f0f0, 100px, items-end (Figma)
+// ============================================================
+.header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 0 10px;
+  height: 100px;
+  background: $header-bg;
+  flex-shrink: 0;
+}
+
+.backBtn {
+  @include button-reset;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  color: $color-text;
+  flex-shrink: 0;
+}
+
+.headerTitle {
+  font-size: 20px;
+  font-weight: $font-weight-bold;
+  line-height: 40px;
+  color: $color-text;
+}
+
+.headerSpacer {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+}
+
+// ============================================================
+// Scrollable content
+// ============================================================
+.content {
+  flex: 1;
+  overflow-y: auto;
+  @include hide-scrollbar;
+}
+
+.stepContent {
+  padding: 20px;
+  @include flex-column;
+  gap: 20px;
+}
+
+// ============================================================
+// Section card (white + shadow, Figma)
+// ============================================================
+.card {
+  background: $color-background;
+  border-radius: 10px;
+  box-shadow: $card-shadow;
+  padding: 10px;
+  @include flex-column;
+  gap: 10px;
+}
+
+// ============================================================
+// Step header inside card (여행설계헤드)
+// ============================================================
+.stepHeader {
+  @include flex-column;
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  background: $color-background;
+  z-index: 1;
+  border-radius: 10px 10px 0 0;
+  margin: -10px -10px 0;
+  padding: 10px 10px 10px;
+}
+
+.stepLabel {
+  font-size: 12px;
+  font-weight: $font-weight-semibold;
+  color: $step-orange;
+  line-height: 20px;
+}
+
+.stepTitle {
+  font-size: 24px;
+  font-weight: $font-weight-bold;
+  color: $color-text;
+  line-height: 40px;
+  margin: 0;
+}
+
+.stepSubtitle {
+  font-size: 14px;
+  color: #999999;
+  line-height: 20px;
+  margin: 0;
+}
+
+// ============================================================
+// Step 1: Purpose list buttons
+// ============================================================
+.purposeList {
+  @include flex-column;
+  gap: 10px;
+}
+
+.purposeBtn {
+  @include button-reset;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 60px;
+  padding: 8px 20px;
+  border-radius: 6px;
+  background: $btn-default;
+  font-size: 16px;
+  font-weight: $font-weight-semibold;
+  color: #1e1e1e;
+  cursor: pointer;
+  transition: background $transition-fast;
+  text-align: left;
+
+  &.purposeBtnSelected {
+    background: $selected-orange;
+    color: #fff;
+  }
+}
+
+.radioCircle {
+  width: 24px;
+  height: 24px;
+  border-radius: $radius-full;
+  background: $color-background;
+  flex-shrink: 0;
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  transition: background $transition-fast;
+
+  &.radioSelected {
+    background: rgba(255, 255, 255, 0.9);
+    border-color: rgba(255, 255, 255, 0.7);
+  }
+}
+
+// ============================================================
+// Step 2: Day row buttons (1~7)
+// ============================================================
+.dayRow {
+  display: flex;
+  gap: 6px;
+}
+
+.dayBtn {
+  @include button-reset;
+  flex: 1;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: $btn-default;
+  font-size: 16px;
+  font-weight: $font-weight-semibold;
+  color: #1e1e1e;
+  cursor: pointer;
+  transition: background $transition-fast;
+
+  &.dayBtnSelected {
+    background: $selected-orange;
+    color: #fff;
+  }
+}
+
+// ============================================================
+// Dropdowns (셀렉트, Figma style)
+// ============================================================
+.selectGroup {
+  @include flex-column;
+  gap: 0;
+}
+
+.selectLabel {
+  font-size: 16px;
+  font-weight: $font-weight-semibold;
+  color: $color-text;
+  line-height: 40px;
+}
+
+.selectBox {
+  width: 100%;
+  height: 48px;
+  padding: 0 40px 0 12px;
+  background: $dropdown-bg;
+  border: 1px solid $dropdown-border;
+  border-radius: 4px;
+  font-size: 16px;
+  font-weight: $font-weight-semibold;
+  color: #444444;
+  font-family: $font-family-base;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg width='16' height='8' viewBox='0 0 16 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L8 7L15 1' stroke='%23444' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  cursor: pointer;
+  box-sizing: border-box;
+  outline: none;
+}
+
+// ============================================================
+// Transport grid (4-col) & Region grid (4-col)
+// ============================================================
+.transportGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.regionGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.gridBtn {
+  @include button-reset;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: $btn-default;
+  font-size: 14px;
+  font-weight: $font-weight-semibold;
+  color: #1e1e1e;
+  cursor: pointer;
+  transition: background $transition-fast, color $transition-fast;
+  text-align: center;
+  padding: 0 4px;
+  word-break: keep-all;
+
+  &.gridBtnSelected {
+    background: $selected-orange;
+    color: #fff;
+  }
+}
+
+// ============================================================
+// Jeju map
+// ============================================================
+.mapContainer {
+  width: 100%;
+  aspect-ratio: 390 / 260;
+  background: $dropdown-bg;
+  border-radius: $radius-md;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mapImage {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+// ============================================================
+// Loading
+// ============================================================
+.loadingWrap {
+  @include flex-column;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-5;
+  flex: 1;
+  padding: $spacing-8 $spacing-4;
+}
+
+.loadingOrb {
+  width: 72px;
+  height: 72px;
+  border-radius: $radius-full;
+  background: radial-gradient(circle at 30% 30%, $color-primary-lighter, $color-primary);
+  animation: orbPulse 1.6s ease-in-out infinite;
+}
+
+@keyframes orbPulse {
+  0%, 100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba($color-primary, 0.4); }
+  70% { transform: scale(1); box-shadow: 0 0 0 18px rgba($color-primary, 0); }
+}
+
+.loadingText {
+  font-size: 24px;
+  font-weight: $font-weight-bold;
+  color: $color-text;
+  text-align: center;
+  margin: 0;
+}
+
+.loadingDots {
+  display: flex;
+  gap: $spacing-2;
+
+  span {
+    width: 8px;
+    height: 8px;
+    border-radius: $radius-full;
+    background: $color-primary-light;
+    animation: dotBounce 1.4s ease-in-out infinite;
+
+    &:nth-child(2) { animation-delay: 0.2s; }
+    &:nth-child(3) { animation-delay: 0.4s; }
+  }
+}
+
+@keyframes dotBounce {
+  0%, 80%, 100% { transform: scale(0.7); opacity: 0.5; }
+  40% { transform: scale(1); opacity: 1; }
+}
+
+// ============================================================
+// Course Select (Step 6)
+// ============================================================
+.courseDesc {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  padding: 0 20px;
+  padding-top: 20px;
+}
+
+.courseList {
+  @include flex-column;
+  gap: 12px;
+  padding: 12px 20px 20px;
+}
+
+.courseCard {
+  @include button-reset;
+  @include flex-column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 16px;
+  border: 2px solid $color-border;
+  border-radius: $radius-xl;
+  background: $color-background;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  box-shadow: $card-shadow;
+  transition: border-color $transition-fast;
+
+  &.courseCardSelected {
+    border-color: $selected-orange;
+    box-shadow: 0 0 0 3px rgba($selected-orange, 0.2);
+  }
+}
+
+.courseCardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  color: $selected-orange;
+}
+
+.courseCardNum {
+  font-size: $font-size-xs;
+  font-weight: $font-weight-semibold;
+  color: $selected-orange;
+}
+
+.courseCardTitle {
+  font-size: $font-size-base;
+  font-weight: $font-weight-bold;
+  color: $color-text;
+  margin: 0;
+}
+
+.courseCardDesc {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  line-height: $line-height-base;
+  margin: 0;
+  @include truncate(2);
+}
+
+.courseCardMeta {
+  display: flex;
+  gap: 12px;
+  font-size: $font-size-xs;
+  color: $color-text-muted;
+}
+
+// ============================================================
+// Tags
+// ============================================================
+.tagRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  background: rgba(#2D6A4F, 0.1);
+  border-radius: $radius-full;
+  font-size: $font-size-xs;
+  color: $color-primary;
+  font-weight: $font-weight-medium;
+}
+
+// ============================================================
+// Course Detail (Step 7)
+// ============================================================
+.detailWrap {
+  @include flex-column;
+}
+
+.detailMapPlaceholder {
+  @include flex-column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  background: $color-background-gray;
+  gap: 8px;
+  flex-shrink: 0;
+  font-size: $font-size-sm;
+  color: $color-text-muted;
+}
+
+.detailMapIcon {
+  font-size: 48px;
+}
+
+.detailBody {
+  padding: 20px 16px;
+  @include flex-column;
+  gap: 12px;
+}
+
+.detailTitle {
+  font-size: 20px;
+  font-weight: $font-weight-bold;
+  color: $color-text;
+  margin: 0;
+}
+
+.detailDesc {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  line-height: $line-height-base;
+  margin: 0;
+}
+
+.scheduleSectionTitle {
+  font-size: $font-size-base;
+  font-weight: $font-weight-semibold;
+  color: $color-text;
+  margin: 0 0 16px 0;
+}
+
+.scheduleList { @include flex-column; }
+
+.scheduleItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  min-height: 48px;
+}
+
+.scheduleTime {
+  font-size: $font-size-xs;
+  color: $color-text-muted;
+  width: 42px;
+  flex-shrink: 0;
+  padding-top: 2px;
+  font-variant-numeric: tabular-nums;
+}
+
+.scheduleConnector {
+  @include flex-column;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.scheduleDot {
+  width: 10px;
+  height: 10px;
+  border-radius: $radius-full;
+  flex-shrink: 0;
+}
+
+.scheduleLine {
+  width: 2px;
+  flex: 1;
+  min-height: 30px;
+  background: $color-border-light;
+  margin-top: 2px;
+}
+
+.scheduleContent {
+  @include flex-column;
+  gap: 2px;
+  padding-bottom: 16px;
+}
+
+.scheduleCategory {
+  font-size: $font-size-xs;
+  font-weight: $font-weight-semibold;
+}
+
+.schedulePlace {
+  font-size: $font-size-sm;
+  color: $color-text;
+}
+
+// ============================================================
+// Save (Step 8)
+// ============================================================
+.saveContent {
+  padding: 20px;
+  @include flex-column;
+  gap: 24px;
+}
+
+.saveDesc {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+}
+
+.saveField {
+  @include flex-column;
+  gap: 8px;
+}
+
+.saveLabel {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $color-text;
+}
+
+.saveInput {
+  width: 100%;
+  height: 48px;
+  padding: 0 12px;
+  border: 1.5px solid $color-border;
+  border-radius: 6px;
+  font-size: $font-size-base;
+  color: $color-text;
+  font-family: $font-family-base;
+  background: $color-background;
+  outline: none;
+  box-sizing: border-box;
+
+  &:focus { border-color: $color-primary; }
+}
+
+.toggleField {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 0;
+  border-bottom: 1px solid $color-border-light;
+}
+
+.toggleInfo { @include flex-column; gap: 3px; }
+
+.toggleLabel {
+  font-size: $font-size-base;
+  font-weight: $font-weight-medium;
+  color: $color-text;
+}
+
+.toggleHint {
+  font-size: $font-size-xs;
+  color: $color-text-muted;
+}
+
+.toggle {
+  @include button-reset;
+  position: relative;
+  width: 48px;
+  height: 28px;
+  border-radius: $radius-full;
+  background: $color-border;
+  cursor: pointer;
+  transition: background $transition-fast;
+  flex-shrink: 0;
+
+  &.toggleOn { background: $color-primary; }
+}
+
+.toggleThumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 22px;
+  height: 22px;
+  border-radius: $radius-full;
+  background: #fff;
+  box-shadow: $shadow-sm;
+  transition: transform $transition-fast;
+
+  .toggleOn & { transform: translateX(20px); }
+}
+
+// ============================================================
+// Bottom bar — 이전(90px) + 다음(flex-1), Figma style
+// ============================================================
+.bottomBar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 20px;
+  background: $color-background;
+  flex-shrink: 0;
+  border-top: 1px solid $color-border-light;
+}
+
+.btnPrev {
+  @include button-reset;
+  width: 90px;
+  height: 52px;
+  border-radius: 6px;
+  background: $btn-default;
+  font-size: 16px;
+  font-weight: $font-weight-semibold;
+  color: #1e1e1e;
+  cursor: pointer;
+  flex-shrink: 0;
+  text-align: center;
+}
+
+.btnNext {
+  @include button-reset;
+  flex: 1;
+  height: 52px;
+  border-radius: 6px;
+  background: $btn-dark;
+  font-size: 16px;
+  font-weight: $font-weight-bold;
+  color: #e0e0e0;
+  cursor: pointer;
+  text-align: center;
+  transition: opacity $transition-fast;
+
+  &:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+}
+
+.btnDraft {
+  @include button-reset;
+  flex: 1;
+  height: 52px;
+  border-radius: 6px;
+  background: $btn-default;
+  font-size: 16px;
+  font-weight: $font-weight-semibold;
+  color: #1e1e1e;
+  cursor: pointer;
+  text-align: center;
+}

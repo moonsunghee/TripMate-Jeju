@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import BottomNav from "./BottomNav";
 import styles from "./LayoutShell.module.scss";
 
-const HIDE_NAV_PATHS = ["/login", "/register"];
+const HIDE_NAV_PATHS = ["/login", "/register", "/design"];
 
 export default function LayoutShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
