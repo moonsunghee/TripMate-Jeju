@@ -21,8 +21,9 @@
 ### 1단계 (웹 프로토타입)
 - **프론트엔드**: Next.js
 - **백엔드**: Python (FastAPI)
-- **AI**: 생성형 AI API (코스 자동 생성)
+- **AI**: 생성형 AI 에이전트 (LangChain / LangGraph)
 - **배포**: Vercel (프론트엔드)
+- **개발환경**: VSCode
 
 ### 2단계 (모바일 리빌드)
 - **프론트엔드**: Flutter (iOS / Android)
@@ -386,6 +387,7 @@
 | 2026-03-08 | Figma 화면설계 반영 (로그인, 홈, 코스게시판, 코스설계 플로우, 내 코스, 채팅, 게시글 상세) |
 | 2026-03-08 | 1단계 프론트엔드 배포 환경 Vercel로 확정 |
 | 2026-03-08 | 프로젝트 폴더 구조 세팅 (frontend/backend/mobile) |
+| 2026-03-08 | AI 에이전트 방식 확정 (LangChain/LangGraph), 개발환경 VSCode |
 
 ---
 

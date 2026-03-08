@@ -4,3 +4,9 @@ sqlalchemy
 pydantic
 python-dotenv
 httpx
+
+# AI Agent
+langchain
+langgraph
+langchain-openai
+openai
