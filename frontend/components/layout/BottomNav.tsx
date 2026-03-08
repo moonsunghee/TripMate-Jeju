@@ -3,50 +3,40 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  HiHome,
-  HiOutlineHome,
-  HiClipboardDocumentList,
-  HiOutlineClipboardDocumentList,
-  HiPencilSquare,
-  HiOutlinePencilSquare,
-  HiMap,
-  HiOutlineMap,
-  HiChatBubbleLeftRight,
-  HiOutlineChatBubbleLeftRight,
-} from "react-icons/hi2";
+  House,
+  Newspaper,
+  Compass,
+  MapTrifold,
+  ChatCircle,
+} from "@phosphor-icons/react";
 import styles from "./BottomNav.module.scss";
 
 const NAV_ITEMS = [
   {
     href: "/",
     label: "홈",
-    icon: HiOutlineHome,
-    activeIcon: HiHome,
+    icon: House,
   },
   {
     href: "/board",
     label: "코스게시판",
-    icon: HiOutlineClipboardDocumentList,
-    activeIcon: HiClipboardDocumentList,
+    icon: Newspaper,
   },
   {
     href: "/design",
     label: "코스설계",
-    icon: HiOutlinePencilSquare,
-    activeIcon: HiPencilSquare,
+    icon: Compass,
     isCta: true,
   },
   {
     href: "/my-courses",
     label: "내코스",
-    icon: HiOutlineMap,
-    activeIcon: HiMap,
+    icon: MapTrifold,
   },
   {
     href: "/chat",
     label: "채팅",
-    icon: HiOutlineChatBubbleLeftRight,
-    activeIcon: HiChatBubbleLeftRight,
+    icon: ChatCircle,
   },
 ];
 
@@ -57,7 +47,7 @@ export default function BottomNav() {
     <nav className={styles.nav}>
       {NAV_ITEMS.map((item) => {
         const isActive = pathname === item.href;
-        const Icon = isActive ? item.activeIcon : item.icon;
+        const Icon = item.icon;
 
         return (
           <Link
@@ -66,7 +56,10 @@ export default function BottomNav() {
             className={`${styles.item} ${isActive ? styles.active : ""} ${item.isCta ? styles.cta : ""}`}
           >
             <span className={styles.iconWrap}>
-              <Icon size={24} />
+              <Icon
+                size={24}
+                weight={isActive ? "fill" : "regular"}
+              />
             </span>
             <span className={styles.label}>{item.label}</span>
           </Link>
