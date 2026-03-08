@@ -1,0 +1,57 @@
+@import "../../styles/variables";
+@import "../../styles/mixins";
+
+.header {
+  @include flex-between;
+  position: sticky;
+  top: 0;
+  width: 100%;
+  height: $header-height;
+  padding: 0 $spacing-4;
+  background-color: $color-background;
+  border-bottom: 1px solid $color-border-light;
+  z-index: $z-index-header;
+}
+
+.transparent {
+  background-color: transparent;
+  border-bottom: none;
+}
+
+.left {
+  width: 40px;
+  @include flex-start;
+}
+
+.title {
+  font-size: $font-size-base;
+  font-weight: $font-weight-semibold;
+  color: $color-text;
+  flex: 1;
+  text-align: center;
+}
+
+.right {
+  width: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.iconBtn {
+  @include button-reset;
+  @include flex-center;
+  width: 36px;
+  height: 36px;
+  border-radius: $radius-full;
+  color: $color-text;
+  transition: background-color $transition-fast;
+
+  &:hover {
+    background-color: $color-background-gray;
+  }
+
+  &:active {
+    opacity: 0.7;
+  }
+}

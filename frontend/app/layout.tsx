@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import LayoutShell from "@/components/layout/LayoutShell";
 import "./globals.scss";
 
 export const metadata: Metadata = {
@@ -13,7 +14,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko">
-      <body>{children}</body>
+      <body>
+        <LayoutShell>{children}</LayoutShell>
+      </body>
     </html>
   );
 }

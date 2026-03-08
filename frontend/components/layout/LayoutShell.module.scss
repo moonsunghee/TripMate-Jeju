@@ -1,0 +1,17 @@
+@import "../../styles/variables";
+
+.shell {
+  max-width: $mobile-max-width;
+  margin: 0 auto;
+  min-height: 100vh;
+  background-color: $color-background;
+  position: relative;
+}
+
+.content {
+  min-height: 100vh;
+}
+
+.withNav {
+  padding-bottom: $bottom-nav-height;
+}

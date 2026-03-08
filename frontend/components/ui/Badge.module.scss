@@ -1,0 +1,36 @@
+@import "../../styles/variables";
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px $spacing-2;
+  border-radius: $radius-full;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-semibold;
+  white-space: nowrap;
+}
+
+.master {
+  background-color: rgba($color-badge-master, 0.12);
+  color: $color-badge-master;
+}
+
+.recruiting {
+  background-color: rgba($color-badge-recruiting, 0.12);
+  color: $color-badge-recruiting;
+}
+
+.joined {
+  background-color: rgba($color-badge-joined, 0.12);
+  color: $color-badge-joined;
+}
+
+.closed {
+  background-color: rgba($color-badge-closed, 0.12);
+  color: $color-badge-closed;
+}
+
+.draft {
+  background-color: rgba($color-badge-draft, 0.12);
+  color: $color-badge-draft;
+}
