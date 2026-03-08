@@ -1,0 +1,161 @@
+@import "../../styles/variables";
+@import "../../styles/mixins";
+
+.page {
+  @include flex-column;
+  min-height: 100vh;
+  padding: $spacing-8 $spacing-6 $spacing-10;
+  background-color: $color-background;
+}
+
+// 로고
+.logoArea {
+  @include flex-column;
+  align-items: center;
+  padding: $spacing-10 0 $spacing-8;
+}
+
+.logoIcon {
+  font-size: 48px;
+  margin-bottom: $spacing-3;
+}
+
+.logoTitle {
+  font-size: $font-size-2xl;
+  font-weight: $font-weight-bold;
+  color: $color-primary;
+  letter-spacing: -0.5px;
+}
+
+.logoSubtitle {
+  font-size: $font-size-sm;
+  color: $color-text-muted;
+  margin-top: $spacing-1;
+}
+
+// 폼
+.form {
+  @include flex-column;
+  gap: $spacing-4;
+  margin-bottom: $spacing-4;
+}
+
+.forgotWrap {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: -$spacing-2;
+}
+
+.forgotLink {
+  font-size: $font-size-sm;
+  color: $color-text-muted;
+  text-decoration: underline;
+}
+
+.loginBtn {
+  width: 100%;
+  height: 52px;
+  background-color: $color-primary;
+  color: #ffffff;
+  border: none;
+  border-radius: $radius-md;
+  font-size: $font-size-base;
+  font-weight: $font-weight-semibold;
+  cursor: pointer;
+  margin-top: $spacing-2;
+  transition: background-color $transition-fast;
+
+  &:hover {
+    background-color: darken($color-primary, 8%);
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+// 구분선
+.dividerWrap {
+  position: relative;
+  text-align: center;
+  margin: $spacing-6 0;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background-color: $color-border;
+  }
+}
+
+.divider {
+  position: relative;
+  padding: 0 $spacing-3;
+  background-color: $color-background;
+  font-size: $font-size-sm;
+  color: $color-text-muted;
+}
+
+// 소셜 로그인
+.socialBtns {
+  @include flex-column;
+  gap: $spacing-3;
+}
+
+.socialBtn {
+  width: 100%;
+  height: 52px;
+  border-radius: $radius-md;
+  border: none;
+  font-size: $font-size-base;
+  font-weight: $font-weight-medium;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-2;
+  transition: opacity $transition-fast;
+
+  &:active {
+    opacity: 0.85;
+  }
+}
+
+.kakao {
+  background-color: #FEE500;
+  color: #191919;
+}
+
+.naver {
+  background-color: #03C75A;
+  color: #ffffff;
+}
+
+.naverN {
+  font-size: $font-size-base;
+  font-weight: $font-weight-bold;
+  line-height: 1;
+}
+
+.google {
+  background-color: #ffffff;
+  color: $color-text;
+  border: 1.5px solid $color-border;
+}
+
+// 회원가입 링크
+.registerLink {
+  text-align: center;
+  margin-top: $spacing-8;
+  font-size: $font-size-sm;
+  color: $color-text-muted;
+}
+
+.registerAnchor {
+  color: $color-primary;
+  font-weight: $font-weight-semibold;
+  text-decoration: underline;
+}
