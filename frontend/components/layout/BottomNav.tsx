@@ -3,40 +3,45 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  House,
-  Newspaper,
-  Compass,
-  MapTrifold,
-  ChatCircle,
-} from "@phosphor-icons/react";
+  RiHome2Line, RiHome2Fill,
+  RiNewspaperLine, RiNewspaperFill,
+  RiCompass3Line, RiCompass3Fill,
+  RiMapLine, RiMapFill,
+  RiMessage2Line, RiMessage2Fill,
+} from "react-icons/ri";
 import styles from "./BottomNav.module.scss";
 
 const NAV_ITEMS = [
   {
     href: "/",
     label: "홈",
-    icon: House,
+    icon: RiHome2Line,
+    activeIcon: RiHome2Fill,
   },
   {
     href: "/board",
     label: "코스게시판",
-    icon: Newspaper,
+    icon: RiNewspaperLine,
+    activeIcon: RiNewspaperFill,
   },
   {
     href: "/design",
     label: "코스설계",
-    icon: Compass,
+    icon: RiCompass3Line,
+    activeIcon: RiCompass3Fill,
     isCta: true,
   },
   {
     href: "/my-courses",
     label: "내코스",
-    icon: MapTrifold,
+    icon: RiMapLine,
+    activeIcon: RiMapFill,
   },
   {
     href: "/chat",
     label: "채팅",
-    icon: ChatCircle,
+    icon: RiMessage2Line,
+    activeIcon: RiMessage2Fill,
   },
 ];
 
@@ -47,7 +52,7 @@ export default function BottomNav() {
     <nav className={styles.nav}>
       {NAV_ITEMS.map((item) => {
         const isActive = pathname === item.href;
-        const Icon = item.icon;
+        const Icon = isActive ? item.activeIcon : item.icon;
 
         return (
           <Link
@@ -56,10 +61,7 @@ export default function BottomNav() {
             className={`${styles.item} ${isActive ? styles.active : ""} ${item.isCta ? styles.cta : ""}`}
           >
             <span className={styles.iconWrap}>
-              <Icon
-                size={24}
-                weight={isActive ? "fill" : "regular"}
-              />
+              <Icon size={24} />
             </span>
             <span className={styles.label}>{item.label}</span>
           </Link>
