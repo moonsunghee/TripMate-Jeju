@@ -20,6 +20,7 @@
 
 ### 1단계 (웹 프로토타입)
 - **프론트엔드**: Next.js
+- **스타일링**: SCSS
 - **백엔드**: Python (FastAPI)
 - **AI**: 생성형 AI 에이전트 (LangChain / LangGraph)
 - **배포**: Vercel (프론트엔드)
@@ -388,6 +389,7 @@
 | 2026-03-08 | 1단계 프론트엔드 배포 환경 Vercel로 확정 |
 | 2026-03-08 | 프로젝트 폴더 구조 세팅 (frontend/backend/mobile) |
 | 2026-03-08 | AI 에이전트 방식 확정 (LangChain/LangGraph), 개발환경 VSCode |
+| 2026-03-08 | 스타일링 Tailwind CSS → SCSS 변경 |
 
 ---
 
