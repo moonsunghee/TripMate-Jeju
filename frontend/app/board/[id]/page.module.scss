@@ -1,0 +1,576 @@
+@import "../../../styles/variables";
+@import "../../../styles/mixins";
+
+// ============================================================
+// Layout
+// ============================================================
+.page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: $color-background-gray;
+  position: relative;
+}
+
+.scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+// ============================================================
+// Header
+// ============================================================
+.header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: $z-index-header;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 12px 0;
+  pointer-events: none;
+
+  > * { pointer-events: auto; }
+}
+
+.backBtn {
+  @include button-reset;
+  width: 38px;
+  height: 38px;
+  border-radius: $radius-full;
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(6px);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.headerActions {
+  display: flex;
+  gap: 8px;
+}
+
+.iconBtn {
+  @include button-reset;
+  width: 38px;
+  height: 38px;
+  border-radius: $radius-full;
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(6px);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: opacity $transition-fast;
+
+  &:active { opacity: 0.7; }
+}
+
+.likedIcon {
+  color: #FF6B6B;
+}
+
+// ============================================================
+// Hero
+// ============================================================
+.hero {
+  padding: 56px 20px 28px;
+  @include flex-column;
+  gap: 10px;
+}
+
+.heroBadge {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(6px);
+  border-radius: $radius-full;
+  font-size: $font-size-xs;
+  color: #fff;
+  font-weight: $font-weight-semibold;
+}
+
+.heroTitle {
+  font-size: 20px;
+  font-weight: $font-weight-bold;
+  color: #fff;
+  margin: 0;
+  line-height: 1.4;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.2);
+}
+
+.heroTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.heroTag {
+  font-size: $font-size-xs;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: $font-weight-medium;
+}
+
+// ============================================================
+// Recruit Card
+// ============================================================
+.recruitCard {
+  margin: 0 16px;
+  margin-top: -1px;
+  background: $color-background;
+  border-radius: $radius-xl;
+  padding: 18px 16px 16px;
+  box-shadow: $shadow-sm;
+  @include flex-column;
+  gap: 12px;
+}
+
+.recruitTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.recruitLabel {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $color-text;
+}
+
+.recruitFraction {
+  font-size: $font-size-sm;
+  color: $color-text-muted;
+
+  strong {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-bold;
+    color: $color-text;
+  }
+}
+
+.progressWrap {
+  height: 6px;
+  background: $color-border-light;
+  border-radius: $radius-full;
+  overflow: hidden;
+}
+
+.progressBar {
+  height: 100%;
+  border-radius: $radius-full;
+  transition: width $transition-base;
+}
+
+.memberRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.memberChip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.memberAvatar {
+  width: 32px;
+  height: 32px;
+  border-radius: $radius-full;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-bold;
+  flex-shrink: 0;
+}
+
+.memberAvatarEmpty {
+  width: 32px;
+  height: 32px;
+  border-radius: $radius-full;
+  border: 2px dashed $color-border;
+  color: $color-text-muted;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.memberName {
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+}
+
+.hostBadge {
+  padding: 2px 6px;
+  background: rgba(#2D6A4F, 0.12);
+  color: $color-primary;
+  border-radius: $radius-full;
+  font-size: 10px;
+  font-weight: $font-weight-semibold;
+}
+
+.fullNotice {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 12px;
+  background: rgba(#DC3545, 0.07);
+  border-radius: $radius-md;
+  font-size: $font-size-xs;
+  color: $color-error;
+  font-weight: $font-weight-medium;
+}
+
+// ============================================================
+// Info Grid
+// ============================================================
+.infoGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 12px 16px 0;
+}
+
+.infoItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: $color-background;
+  border-radius: $radius-lg;
+  padding: 14px 14px;
+  box-shadow: $shadow-sm;
+}
+
+.infoIcon {
+  color: $color-primary;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.infoLabel {
+  font-size: 11px;
+  color: $color-text-muted;
+  margin: 0 0 3px;
+}
+
+.infoValue {
+  font-size: $font-size-xs;
+  font-weight: $font-weight-semibold;
+  color: $color-text;
+  margin: 0;
+  line-height: 1.4;
+}
+
+// ============================================================
+// Section
+// ============================================================
+.section {
+  margin: 12px 16px 0;
+  background: $color-background;
+  border-radius: $radius-xl;
+  padding: 18px 16px;
+  box-shadow: $shadow-sm;
+  @include flex-column;
+  gap: 14px;
+}
+
+.sectionTitle {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-bold;
+  color: $color-text;
+  margin: 0;
+}
+
+// ============================================================
+// Author
+// ============================================================
+.authorRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.authorAvatar {
+  width: 44px;
+  height: 44px;
+  border-radius: $radius-full;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: $font-size-lg;
+  font-weight: $font-weight-bold;
+  flex-shrink: 0;
+}
+
+.authorInfo {
+  flex: 1;
+  @include flex-column;
+  gap: 3px;
+}
+
+.authorName {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $color-text;
+  margin: 0;
+}
+
+.authorSub {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: $font-size-xs;
+  color: $color-text-muted;
+  margin: 0;
+}
+
+.starIcon {
+  color: #F59F00;
+}
+
+.chatBtn {
+  @include button-reset;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 14px;
+  border: 1.5px solid $color-primary;
+  border-radius: $radius-full;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-semibold;
+  color: $color-primary;
+  cursor: pointer;
+  transition: background $transition-fast;
+
+  &:active { background: rgba(#2D6A4F, 0.06); }
+}
+
+// ============================================================
+// Description
+// ============================================================
+.description {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  margin: 0;
+  line-height: 1.8;
+  white-space: pre-line;
+}
+
+// ============================================================
+// Schedule
+// ============================================================
+.dayTabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.dayTab {
+  @include button-reset;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 16px;
+  border: 1.5px solid $color-border;
+  border-radius: $radius-lg;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $color-text-muted;
+  cursor: pointer;
+  transition: all $transition-fast;
+
+  &:active { opacity: 0.8; }
+}
+
+.dayTabActive {
+  color: #fff;
+}
+
+.dayTabDate {
+  font-size: 10px;
+  font-weight: $font-weight-regular;
+  opacity: 0.85;
+}
+
+.scheduleList {
+  @include flex-column;
+  gap: 0;
+}
+
+.scheduleDate {
+  font-size: $font-size-xs;
+  color: $color-text-muted;
+  font-weight: $font-weight-medium;
+  margin: 0 0 14px;
+}
+
+.scheduleRow {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.timeline {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+  padding-top: 4px;
+}
+
+.timelineDot {
+  width: 10px;
+  height: 10px;
+  border-radius: $radius-full;
+  flex-shrink: 0;
+}
+
+.timelineLine {
+  width: 2px;
+  flex: 1;
+  min-height: 20px;
+  background: repeating-linear-gradient(
+    to bottom,
+    $color-border 0px,
+    $color-border 4px,
+    transparent 4px,
+    transparent 8px
+  );
+  margin: 4px 0;
+}
+
+.scheduleCard {
+  flex: 1;
+  background: $color-background-gray;
+  border-radius: $radius-lg;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  @include flex-column;
+  gap: 5px;
+}
+
+.scheduleCardHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.categoryBadge {
+  display: inline-flex;
+  padding: 2px 8px;
+  border-radius: $radius-full;
+  font-size: 11px;
+  font-weight: $font-weight-semibold;
+}
+
+.scheduleTime {
+  font-size: 11px;
+  color: $color-text-muted;
+}
+
+.scheduleName {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $color-text;
+  margin: 0;
+}
+
+.scheduleAddr {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  color: $color-text-muted;
+  margin: 0;
+}
+
+// ============================================================
+// Stats
+// ============================================================
+.statsRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px 4px;
+}
+
+.statItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: $font-size-xs;
+  color: $color-text-muted;
+}
+
+// ============================================================
+// Bottom bar
+// ============================================================
+.bottomSpacer {
+  height: calc(72px + env(safe-area-inset-bottom));
+}
+
+.bottomBar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  padding-bottom: calc(12px + env(safe-area-inset-bottom));
+  background: $color-background;
+  border-top: 1px solid $color-border-light;
+  box-shadow: 0 -4px 16px rgba(0,0,0,0.06);
+}
+
+.commentBtn {
+  @include button-reset;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 14px;
+  border: 1.5px solid $color-border;
+  border-radius: $radius-lg;
+  color: $color-text-muted;
+  cursor: pointer;
+  font-size: 11px;
+  transition: background $transition-fast;
+
+  &:active { background: $color-background-gray; }
+}
+
+.joinBtn {
+  flex: 1;
+  height: 48px;
+  border: none;
+  border-radius: $radius-lg;
+  font-size: $font-size-base;
+  font-weight: $font-weight-bold;
+  color: #fff;
+  cursor: pointer;
+  transition: opacity $transition-fast;
+
+  &:active { opacity: 0.85; }
+}
+
+.joinBtnDisabled {
+  background: $color-border !important;
+  color: $color-text-muted;
+  cursor: not-allowed;
+}

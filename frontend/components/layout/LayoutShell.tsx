@@ -5,7 +5,7 @@ import BottomNav from "./BottomNav";
 import styles from "./LayoutShell.module.scss";
 
 const HIDE_NAV_EXACT = ["/login", "/register", "/design"];
-const HIDE_NAV_PREFIX = ["/chat/"];
+const HIDE_NAV_PREFIX = ["/chat/", "/board/"];
 
 export default function LayoutShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
