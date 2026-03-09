@@ -8,7 +8,9 @@
   transform: translateX(-50%);
   width: 100%;
   max-width: $mobile-max-width;
-  height: $bottom-nav-height;
+  // 아이콘 영역 높이 + iOS 홈 인디케이터 safe area
+  height: calc(#{$bottom-nav-height} + env(safe-area-inset-bottom));
+  padding-bottom: env(safe-area-inset-bottom);
   background-color: $color-background;
   border-top: 1px solid $color-border-light;
   box-shadow: $shadow-bottom-nav;
@@ -20,12 +22,16 @@
 .item {
   @include flex-column;
   @include flex-center;
-  gap: 2px;
-  padding: $spacing-2 0;
+  gap: 3px;
+  // 터치 영역을 nav 전체 높이에서 safe area를 뺀 영역으로 제한
+  padding-top: $spacing-2;
+  padding-bottom: $spacing-2;
   color: $color-text-muted;
   transition: color $transition-fast;
   position: relative;
   text-decoration: none;
+  // 최소 터치 높이 보장
+  min-height: 44px;
 
   &:active {
     opacity: 0.7;

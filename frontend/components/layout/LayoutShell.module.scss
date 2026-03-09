@@ -8,8 +8,9 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  // 노치/홈바 safe area
+  // 노치 safe area (top)
   padding-top: env(safe-area-inset-top);
+  // bottom은 BottomNav가 없는 페이지를 위해 유지
   padding-bottom: env(safe-area-inset-bottom);
 }
 
@@ -19,5 +20,6 @@
 }
 
 .withNav {
-  padding-bottom: $bottom-nav-height;
+  // BottomNav 높이 + iOS 홈 인디케이터 safe area 만큼 여백
+  padding-bottom: calc(#{$bottom-nav-height} + env(safe-area-inset-bottom));
 }
