@@ -102,3 +102,13 @@
     transform: scale(0.98);
   }
 }
+
+.errorMsg {
+  padding: 10px 14px;
+  background: rgba(#DC3545, 0.08);
+  border: 1px solid rgba(#DC3545, 0.25);
+  border-radius: 8px;
+  font-size: 14px;
+  color: #DC3545;
+  margin: 0;
+}

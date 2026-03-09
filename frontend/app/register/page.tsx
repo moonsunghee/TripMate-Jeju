@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { RiArrowLeftLine } from "react-icons/ri";
 import Input from "@/components/ui/Input";
+import { api, ApiError } from "@/lib/api";
+import { authStorage, type TokenResponse } from "@/lib/auth";
 import styles from "./page.module.scss";
 
 export default function RegisterPage() {
@@ -17,6 +19,8 @@ export default function RegisterPage() {
     bio: "",
   });
   const [errors, setErrors] = useState<Partial<typeof form>>({});
+  const [serverError, setServerError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -37,14 +41,29 @@ export default function RegisterPage() {
     return newErrors;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const newErrors = validate();
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
     }
-    // TODO: 회원가입 API 연동
+
+    setServerError("");
+    setLoading(true);
+    try {
+      const data = await api.post<TokenResponse>("/api/auth/register", {
+        email: form.email,
+        password: form.password,
+        nickname: form.nickname,
+      });
+      authStorage.setToken(data.access_token);
+      router.push("/");
+    } catch (err) {
+      setServerError(err instanceof ApiError ? err.message : "회원가입에 실패했습니다.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -59,6 +78,7 @@ export default function RegisterPage() {
 
       {/* 폼 */}
       <form className={styles.form} onSubmit={handleSubmit}>
+        {serverError && <p className={styles.errorMsg}>{serverError}</p>}
         <Input
           label="이메일 *"
           type="email"
@@ -119,8 +139,8 @@ export default function RegisterPage() {
           />
         </div>
 
-        <button type="submit" className={styles.submitBtn}>
-          가입하기
+        <button type="submit" className={styles.submitBtn} disabled={loading}>
+          {loading ? "처리 중..." : "가입하기"}
         </button>
       </form>
     </div>

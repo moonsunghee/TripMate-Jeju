@@ -1,19 +1,39 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { Suspense, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { RiKakaoTalkFill } from "react-icons/ri";
 import { FcGoogle } from "react-icons/fc";
 import Input from "@/components/ui/Input";
+import { api, ApiError } from "@/lib/api";
+import { authStorage, type TokenResponse } from "@/lib/auth";
 import styles from "./page.module.scss";
 
-export default function LoginPage() {
+function LoginForm() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: 로그인 API 연동
+    if (!email || !password) return;
+
+    setError("");
+    setLoading(true);
+    try {
+      const data = await api.post<TokenResponse>("/api/auth/login", { email, password });
+      authStorage.setToken(data.access_token);
+      const next = searchParams.get("next") ?? "/";
+      router.push(next);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "로그인에 실패했습니다.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -27,6 +47,7 @@ export default function LoginPage() {
 
       {/* 로그인 폼 */}
       <form className={styles.form} onSubmit={handleSubmit}>
+        {error && <p className={styles.errorMsg}>{error}</p>}
         <Input
           label="이메일"
           type="email"
@@ -50,8 +71,8 @@ export default function LoginPage() {
           </Link>
         </div>
 
-        <button type="submit" className={styles.loginBtn}>
-          로그인
+        <button type="submit" className={styles.loginBtn} disabled={loading}>
+          {loading ? "로그인 중..." : "로그인"}
         </button>
       </form>
 
@@ -83,5 +104,13 @@ export default function LoginPage() {
         </Link>
       </p>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginForm />
+    </Suspense>
   );
 }

@@ -7,6 +7,8 @@ import {
   RiSunLine, RiCompass3Line, RiAnchorLine, RiRunLine, RiWalkLine,
   RiHeartPulseLine, RiFlag2Line, RiDropLine, RiBikeLine,
   RiUserSmileLine, RiGroupLine,
+  RiRestaurantLine, RiCupLine, RiMapPin2Line, RiHome2Line,
+  RiCarLine, RiHeartLine, RiRouteLine, RiCalendarLine, RiTimeLine,
 } from "react-icons/ri";
 import type { IconType } from "react-icons";
 import JejuMap from "@/components/ui/JejuMap";
@@ -80,57 +82,124 @@ const CATEGORY_COLORS: Record<string, string> = {
   디저트: "#862E9C", 관광지: "#2D6A4F", 숙소: "#495057", 야식: "#D9480F",
 };
 
+const CATEGORY_ICONS: Record<string, IconType> = {
+  조식: RiRestaurantLine,
+  중식: RiRestaurantLine,
+  석식: RiRestaurantLine,
+  야식: RiRestaurantLine,
+  디저트: RiCupLine,
+  관광지: RiMapPin2Line,
+  숙소: RiHome2Line,
+};
+
 const MOCK_COURSES = [
   {
     title: "제주 자연 힐링 코스",
-    tags: ["#자연", "#힐링", "#올레길"],
+    tags: ["자연", "힐링", "올레길", "맛집", "트레킹"],
     region: "성산읍 · 제주시",
+    distance: "28km",
     duration: "2박 3일",
+    likes: 54,
     summary: "성산일출봉부터 올레길, 협재해수욕장까지 제주 대표 자연 명소를 잇는 코스",
-    schedule: [
-      { time: "08:00", category: "조식", place: "성산 해녀의 집" },
-      { time: "10:00", category: "관광지", place: "성산일출봉" },
-      { time: "13:00", category: "중식", place: "성산항 횟집" },
-      { time: "15:00", category: "관광지", place: "섭지코지" },
-      { time: "18:30", category: "석식", place: "제주 흑돼지 거리" },
-      { time: "21:00", category: "숙소", place: "제주시 호텔" },
+    days: [
+      { items: [
+        { category: "조식", place: "성산 해녀의 집", duration: "1시간", address: "제주 서귀포시 성산읍 성산리 78" },
+        { category: "관광지", place: "성산일출봉", duration: "2시간", address: "제주 서귀포시 성산읍 일출로 284-12" },
+        { category: "중식", place: "성산항 횟집", duration: "1시간", address: "제주 서귀포시 성산읍 성산리 224" },
+        { category: "관광지", place: "섭지코지", duration: "2시간", address: "제주 서귀포시 성산읍 고성리 127-1" },
+        { category: "석식", place: "제주 흑돼지 거리", duration: "1.5시간", address: "제주 제주시 연동 291-15" },
+        { category: "숙소", place: "제주시 호텔", duration: "12시간", address: "제주 제주시 연동 312-1" },
+      ], transports: ["45min", "20min", "30min", "45min", "10min"] },
+      { items: [
+        { category: "조식", place: "제주시 카페", duration: "1시간", address: "제주 제주시 연동 315-3" },
+        { category: "관광지", place: "한라산 등반", duration: "5시간", address: "제주 제주시 아라동 산220" },
+        { category: "중식", place: "어리목 산장", duration: "1시간", address: "제주 제주시 해안동 산220-1" },
+        { category: "관광지", place: "천지연폭포", duration: "1.5시간", address: "제주 서귀포시 천지동 667-7" },
+        { category: "석식", place: "서귀포 올레시장", duration: "1시간", address: "제주 서귀포시 중앙로 62번길 18" },
+        { category: "숙소", place: "서귀포 호텔", duration: "12시간", address: "제주 서귀포시 중앙로 85" },
+      ], transports: ["1시간", "30min", "50min", "30min", "15min"] },
+      { items: [
+        { category: "조식", place: "서귀포 베이커리", duration: "1시간", address: "제주 서귀포시 중앙로 71" },
+        { category: "관광지", place: "협재해수욕장", duration: "2시간", address: "제주 제주시 한림읍 협재리 2497-1" },
+        { category: "중식", place: "한림 해산물 식당", duration: "1시간", address: "제주 제주시 한림읍 한림로 300" },
+        { category: "관광지", place: "곽지해수욕장", duration: "1.5시간", address: "제주 제주시 애월읍 곽지리 1566" },
+        { category: "석식", place: "애월 카페거리", duration: "1.5시간", address: "제주 제주시 애월읍 애월리 2519" },
+      ], transports: ["50min", "20min", "25min", "30min"] },
     ],
   },
   {
     title: "제주 미식 탐방 코스",
-    tags: ["#맛집", "#카페", "#흑돼지"],
+    tags: ["맛집", "카페", "흑돼지", "미식", "투어"],
     region: "제주시 · 서귀포시",
+    distance: "22km",
     duration: "2박 3일",
+    likes: 89,
     summary: "제주 명물 음식과 감성 카페를 중심으로 한 미식 여행",
-    schedule: [
-      { time: "09:00", category: "조식", place: "카페 베케" },
-      { time: "11:00", category: "관광지", place: "동문재래시장" },
-      { time: "13:00", category: "중식", place: "흑돼지 거리" },
-      { time: "15:30", category: "디저트", place: "한라봉 카페" },
-      { time: "18:00", category: "석식", place: "서귀포 한치물회" },
-      { time: "21:00", category: "숙소", place: "서귀포 펜션" },
+    days: [
+      { items: [
+        { category: "조식", place: "카페 베케", duration: "1시간", address: "제주 제주시 구남로2길 32 1층" },
+        { category: "관광지", place: "동문재래시장", duration: "2시간", address: "제주 제주시 관덕로14길 20" },
+        { category: "중식", place: "흑돼지 거리", duration: "1.5시간", address: "제주 제주시 도두일동 1892-4" },
+        { category: "디저트", place: "한라봉 카페", duration: "1시간", address: "제주 제주시 연동 261-30" },
+        { category: "석식", place: "서귀포 한치물회", duration: "1.5시간", address: "제주 서귀포시 서문로 28" },
+        { category: "숙소", place: "서귀포 펜션", duration: "12시간", address: "제주 서귀포시 칠십리로 156" },
+      ], transports: ["20min", "15min", "25min", "35min", "10min"] },
+      { items: [
+        { category: "조식", place: "성산 해변 카페", duration: "1시간", address: "제주 서귀포시 성산읍 성산리 14" },
+        { category: "관광지", place: "성산일출봉", duration: "2시간", address: "제주 서귀포시 성산읍 일출로 284-12" },
+        { category: "중식", place: "해녀 음식점", duration: "1시간", address: "제주 서귀포시 성산읍 성산리 78" },
+        { category: "디저트", place: "우도 땅콩 아이스크림", duration: "1시간", address: "제주 제주시 우도면 우도해안길 40" },
+        { category: "석식", place: "제주시 갈치조림", duration: "1.5시간", address: "제주 제주시 서광로 51" },
+        { category: "숙소", place: "제주시 호텔", duration: "12시간", address: "제주 제주시 연동 312-1" },
+      ], transports: ["1시간", "10min", "1시간 30min", "45min", "20min"] },
+      { items: [
+        { category: "조식", place: "제주 베이글 카페", duration: "1시간", address: "제주 제주시 이도2동 245-3" },
+        { category: "관광지", place: "동문시장 투어", duration: "1.5시간", address: "제주 제주시 관덕로14길 20" },
+        { category: "중식", place: "제주 순대국밥", duration: "1시간", address: "제주 제주시 중앙로 54" },
+        { category: "디저트", place: "제주 오름 카페", duration: "1시간", address: "제주 제주시 조천읍 선흘리 2905" },
+        { category: "석식", place: "공항 근처 흑돼지", duration: "1.5시간", address: "제주 제주시 용담2동 2677" },
+      ], transports: ["15min", "10min", "30min", "25min"] },
     ],
   },
   {
     title: "제주 액티비티 코스",
-    tags: ["#서핑", "#액티비티", "#해양스포츠"],
+    tags: ["서핑", "액티비티", "해양스포츠", "카약", "스노클링"],
     region: "한림읍 · 애월읍",
+    distance: "35km",
     duration: "2박 3일",
+    likes: 67,
     summary: "서핑, 카약, 스노클링 등 다양한 해양 액티비티 중심 코스",
-    schedule: [
-      { time: "08:30", category: "조식", place: "협재 해변 카페" },
-      { time: "10:00", category: "관광지", place: "협재해수욕장 서핑" },
-      { time: "13:00", category: "중식", place: "한림 해산물 식당" },
-      { time: "15:00", category: "관광지", place: "애월 카약" },
-      { time: "18:00", category: "석식", place: "애월 카페거리" },
-      { time: "21:00", category: "숙소", place: "애월 리조트" },
+    days: [
+      { items: [
+        { category: "조식", place: "협재 해변 카페", duration: "1시간", address: "제주 제주시 한림읍 협재리 2500" },
+        { category: "관광지", place: "협재해수욕장 서핑", duration: "3시간", address: "제주 제주시 한림읍 협재리 2497-1" },
+        { category: "중식", place: "한림 해산물 식당", duration: "1시간", address: "제주 제주시 한림읍 한림로 300" },
+        { category: "관광지", place: "애월 카약", duration: "2시간", address: "제주 제주시 애월읍 애월리 2519" },
+        { category: "석식", place: "애월 카페거리", duration: "1.5시간", address: "제주 제주시 애월읍 애월리 2520" },
+        { category: "숙소", place: "애월 리조트", duration: "12시간", address: "제주 제주시 애월읍 하귀1리 1764" },
+      ], transports: ["10min", "20min", "30min", "20min", "15min"] },
+      { items: [
+        { category: "조식", place: "애월 서핑 카페", duration: "1시간", address: "제주 제주시 애월읍 애월리 2521" },
+        { category: "관광지", place: "금능해수욕장 스노클링", duration: "3시간", address: "제주 제주시 한림읍 금능리 119-10" },
+        { category: "중식", place: "한림항 회센터", duration: "1.5시간", address: "제주 제주시 한림읍 한림로 269" },
+        { category: "관광지", place: "비양도 트레킹", duration: "3시간", address: "제주 제주시 한림읍 비양리 1" },
+        { category: "석식", place: "한림 현지 맛집", duration: "1시간", address: "제주 제주시 한림읍 한림로 290" },
+        { category: "숙소", place: "협재 게스트하우스", duration: "12시간", address: "제주 제주시 한림읍 협재리 2498" },
+      ], transports: ["20min", "15min", "30min", "15min", "10min"] },
+      { items: [
+        { category: "조식", place: "협재 조식 카페", duration: "1시간", address: "제주 제주시 한림읍 협재리 2501" },
+        { category: "관광지", place: "곽지해수욕장", duration: "2시간", address: "제주 제주시 애월읍 곽지리 1566" },
+        { category: "중식", place: "애월 해산물 뷔페", duration: "1.5시간", address: "제주 제주시 애월읍 애월리 1422" },
+        { category: "관광지", place: "이호테우해변", duration: "1.5시간", address: "제주 제주시 이호동 1665" },
+        { category: "석식", place: "공항 근처 식당", duration: "1시간", address: "제주 제주시 용담2동 2677" },
+      ], transports: ["25min", "20min", "30min", "20min"] },
     ],
   },
 ];
 
 const SCREEN_TITLES = [
   "여행목적", "여행일", "교통수단", "여행희망지역",
-  "AI코스 설계 중", "코스 선택", "코스 확인", "코스 저장",
+  "AI코스 설계 중", "코스 선택", "추천코스상세", "코스 저장",
 ];
 
 const INITIAL_FORM: DesignFormData = {
@@ -214,6 +283,11 @@ export default function DesignPage() {
               <button className={styles.btnPrev} onClick={handleBack}>이전</button>
               <button className={styles.btnDraft} onClick={() => handleSave(true)}>임시저장</button>
               <button className={styles.btnNext} onClick={() => handleSave(false)}>저장</button>
+            </>
+          ) : step === 7 ? (
+            <>
+              <button className={styles.btnPrev} onClick={handleBack}>취소</button>
+              <button className={styles.btnNext} onClick={handleNext}>코스 선택</button>
             </>
           ) : (
             <>
@@ -461,48 +535,122 @@ function CourseSelectStep({ form, setForm }: StepProps) {
 // Step 7: 코스 상세 확인
 // ============================================================
 function CourseDetailStep({ form }: { form: DesignFormData }) {
+  const [activeDay, setActiveDay] = useState(1);
   const course = form.selectedCourseIndex !== null ? MOCK_COURSES[form.selectedCourseIndex] : null;
   if (!course) return null;
 
+  const currentDay = course.days[activeDay - 1];
+  const items = currentDay?.items ?? [];
+  const transports = currentDay?.transports ?? [];
+
   return (
     <div className={styles.detailWrap}>
-      <div className={styles.detailMapPlaceholder}>
-        <span className={styles.detailMapIcon}>🗺️</span>
-        <p>제주 지도</p>
-      </div>
-      <div className={styles.detailBody}>
-        <div className={styles.tagRow}>
-          {course.tags.map((tag) => <span key={tag} className={styles.tag}>{tag}</span>)}
-        </div>
+      {/* Title + Tags */}
+      <div className={styles.detailTitleSection}>
         <h2 className={styles.detailTitle}>{course.title}</h2>
-        <p className={styles.detailDesc}>{course.summary}</p>
-
-        <div>
-          <h3 className={styles.scheduleSectionTitle}>1일차 일정</h3>
-          <div className={styles.scheduleList}>
-            {course.schedule.map((item, i) => (
-              <div key={i} className={styles.scheduleItem}>
-                <span className={styles.scheduleTime}>{item.time}</span>
-                <div className={styles.scheduleConnector}>
-                  <div
-                    className={styles.scheduleDot}
-                    style={{ backgroundColor: CATEGORY_COLORS[item.category] ?? "#495057" }}
-                  />
-                  {i < course.schedule.length - 1 && <div className={styles.scheduleLine} />}
-                </div>
-                <div className={styles.scheduleContent}>
-                  <span
-                    className={styles.scheduleCategory}
-                    style={{ color: CATEGORY_COLORS[item.category] ?? "#495057" }}
-                  >
-                    {item.category}
-                  </span>
-                  <span className={styles.schedulePlace}>{item.place}</span>
-                </div>
-              </div>
-            ))}
-          </div>
+        <div className={styles.detailTagScroll}>
+          {course.tags.map((tag) => (
+            <span key={tag} className={styles.detailTag}>{tag}</span>
+          ))}
         </div>
+      </div>
+
+      {/* Map placeholder */}
+      <div className={styles.detailMap}>
+        <RiMapPin2Line size={28} className={styles.detailMapIcon} />
+        <p className={styles.detailMapText}>지도</p>
+      </div>
+
+      {/* Stats */}
+      <div className={styles.detailStats}>
+        <div className={styles.detailStatItem}>
+          <RiRouteLine size={16} />
+          <span>{course.distance}</span>
+        </div>
+        <div className={styles.detailStatDivider} />
+        <div className={styles.detailStatItem}>
+          <RiCalendarLine size={16} />
+          <span>{course.duration}</span>
+        </div>
+        <div className={styles.detailStatDivider} />
+        <div className={styles.detailStatItem}>
+          <RiHeartLine size={16} />
+          <span>{course.likes}</span>
+        </div>
+      </div>
+
+      {/* Day tabs */}
+      <div className={styles.dayTabsSection}>
+        <div className={styles.dayTabs}>
+          {course.days.map((_, i) => {
+            const day = i + 1;
+            return (
+              <button
+                key={day}
+                className={`${styles.dayTab} ${activeDay === day ? styles.dayTabActive : ""}`}
+                onClick={() => setActiveDay(day)}
+              >
+                {day}일
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Schedule */}
+      <div className={styles.scheduleSection}>
+        {items.map((item, i) => {
+          const Icon = CATEGORY_ICONS[item.category];
+          return (
+            <div key={i} className={styles.scheduleRow}>
+              {/* Left: number + connector line */}
+              <div className={styles.scheduleLeft}>
+                <div className={styles.scheduleNum}>{i + 1}</div>
+                {i < items.length - 1 && <div className={styles.scheduleConn} />}
+              </div>
+
+              {/* Right: card + transport */}
+              <div className={styles.scheduleRight}>
+                <div className={styles.scheduleCard}>
+                  <div className={styles.scheduleCardTop}>
+                    <div className={styles.scheduleCardCategory}>
+                      {Icon && <Icon size={17} />}
+                      <span>{item.category}</span>
+                    </div>
+                    <div className={styles.scheduleCardDuration}>
+                      <RiTimeLine size={13} />
+                      <span>{item.duration}</span>
+                    </div>
+                  </div>
+                  <div className={styles.scheduleCardAddrRow}>
+                    <span className={styles.scheduleCardAddr}>{item.place}</span>
+                    <button
+                      className={styles.copyBtn}
+                      onClick={() => navigator.clipboard?.writeText(item.place)}
+                    >복사</button>
+                  </div>
+                  <div className={styles.scheduleCardAddrRow}>
+                    <span className={styles.scheduleCardAddr}>{item.address}</span>
+                    <button
+                      className={styles.copyBtn}
+                      onClick={() => navigator.clipboard?.writeText(item.address)}
+                    >복사</button>
+                  </div>
+                  <div className={styles.scheduleCardActions}>
+                    <button className={styles.deleteBtn}>삭제</button>
+                    <button className={styles.editBtn}>수정</button>
+                  </div>
+                </div>
+                {i < items.length - 1 && (
+                  <div className={styles.transportRow}>
+                    <RiCarLine size={15} />
+                    <span>{transports[i]}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

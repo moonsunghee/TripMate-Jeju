@@ -1,0 +1,247 @@
+@import "../../../styles/variables";
+@import "../../../styles/mixins";
+
+.page {
+  position: fixed;
+  inset: 0;
+  max-width: $mobile-max-width;
+  margin: 0 auto;
+  @include flex-column;
+  background: $color-background-gray;
+}
+
+// ============================================================
+// Header
+// ============================================================
+.header {
+  display: flex;
+  align-items: center;
+  padding: 0 4px;
+  height: $header-height;
+  background: $color-background;
+  border-bottom: 1px solid $color-border-light;
+  flex-shrink: 0;
+  gap: 4px;
+}
+
+.backBtn {
+  @include button-reset;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: $color-text;
+  flex-shrink: 0;
+}
+
+.headerCenter {
+  flex: 1;
+  @include flex-column;
+  align-items: center;
+  gap: 1px;
+  min-width: 0;
+}
+
+.headerTitle {
+  font-size: $font-size-base;
+  font-weight: $font-weight-bold;
+  color: $color-text;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.headerSub {
+  font-size: $font-size-xs;
+  color: $color-text-muted;
+}
+
+.moreBtn {
+  @include button-reset;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: $color-text;
+  flex-shrink: 0;
+}
+
+// ============================================================
+// Messages
+// ============================================================
+.messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 12px 8px;
+  @include flex-column;
+  gap: 2px;
+  @include hide-scrollbar;
+}
+
+.dateDivider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 4px 0 12px;
+
+  span {
+    font-size: $font-size-xs;
+    color: $color-text-muted;
+    background: rgba(#000, 0.07);
+    padding: 4px 14px;
+    border-radius: $radius-full;
+  }
+}
+
+// ============================================================
+// Message row
+// ============================================================
+.msgRow {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  margin-bottom: 2px;
+
+  &.msgRowMe {
+    flex-direction: row-reverse;
+  }
+}
+
+.msgAvatar {
+  width: 32px;
+  height: 32px;
+  border-radius: $radius-full;
+  background: $color-primary-lighter;
+  color: $color-primary;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-bold;
+  flex-shrink: 0;
+  align-self: flex-start;
+  margin-top: 18px; // offset for sender name label
+
+  &.msgAvatarHidden {
+    visibility: hidden;
+    margin-top: 0;
+  }
+}
+
+.msgGroup {
+  @include flex-column;
+  gap: 3px;
+  max-width: 72%;
+
+  .msgRowMe & {
+    align-items: flex-end;
+  }
+}
+
+.msgSenderName {
+  font-size: $font-size-xs;
+  color: $color-text-muted;
+  padding-left: 2px;
+}
+
+.msgBubbleRow {
+  display: flex;
+  align-items: flex-end;
+  gap: 5px;
+
+  .msgRowMe & {
+    flex-direction: row-reverse;
+  }
+}
+
+.msgTime {
+  font-size: 11px;
+  color: $color-text-muted;
+  flex-shrink: 0;
+  padding-bottom: 2px;
+  white-space: nowrap;
+}
+
+.msgBubble {
+  padding: 10px 14px;
+  border-radius: 18px;
+  border-bottom-left-radius: 4px;
+  background: $color-background;
+  border: 1px solid $color-border-light;
+  font-size: $font-size-sm;
+  color: $color-text;
+  line-height: 1.55;
+  word-break: break-word;
+  box-shadow: $shadow-sm;
+
+  &.msgBubbleMe {
+    background: #1e1e1e;
+    color: #fff;
+    border: none;
+    border-radius: 18px;
+    border-bottom-right-radius: 4px;
+    box-shadow: none;
+  }
+}
+
+// ============================================================
+// Input bar
+// ============================================================
+.inputBar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: $color-background;
+  border-top: 1px solid $color-border-light;
+  flex-shrink: 0;
+}
+
+.input {
+  flex: 1;
+  height: 44px;
+  padding: 0 16px;
+  border-radius: $radius-full;
+  border: 1.5px solid $color-border;
+  font-size: $font-size-sm;
+  color: $color-text;
+  font-family: $font-family-base;
+  background: $color-background-gray;
+  outline: none;
+  transition: border-color $transition-fast, background $transition-fast;
+
+  &:focus {
+    border-color: $color-primary;
+    background: $color-background;
+  }
+
+  &::placeholder {
+    color: $color-text-muted;
+  }
+}
+
+.sendBtn {
+  @include button-reset;
+  width: 44px;
+  height: 44px;
+  border-radius: $radius-full;
+  background: $color-border;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background $transition-fast;
+
+  &.sendBtnActive {
+    background: $color-primary;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+  }
+}

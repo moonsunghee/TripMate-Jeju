@@ -1,0 +1,330 @@
+@import "../../styles/variables";
+@import "../../styles/mixins";
+
+.page {
+  @include flex-column;
+  background: $color-background-gray;
+  min-height: 100%;
+}
+
+// ============================================================
+// Header
+// ============================================================
+.header {
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  height: $header-height;
+  background: $color-background;
+  border-bottom: 1px solid $color-border-light;
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: $z-index-header;
+}
+
+.headerTitle {
+  font-size: $font-size-base;
+  font-weight: $font-weight-bold;
+  color: $color-text;
+  margin: 0;
+}
+
+// ============================================================
+// Search
+// ============================================================
+.searchWrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 14px 16px 0;
+  padding: 0 14px;
+  height: 42px;
+  background: $color-background;
+  border: 1px solid $color-border;
+  border-radius: $radius-full;
+}
+
+.searchIcon {
+  color: $color-text-muted;
+  flex-shrink: 0;
+}
+
+.searchInput {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: $font-size-sm;
+  color: $color-text;
+
+  &::placeholder {
+    color: $color-text-muted;
+  }
+}
+
+// ============================================================
+// Filter bar
+// ============================================================
+.filterBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px 0;
+}
+
+.tabs {
+  display: flex;
+  gap: 6px;
+}
+
+.tab {
+  @include button-reset;
+  padding: 6px 14px;
+  border-radius: $radius-full;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $color-text-muted;
+  background: $color-background;
+  border: 1px solid $color-border;
+  cursor: pointer;
+  transition: all $transition-fast;
+
+  &:active {
+    opacity: 0.8;
+  }
+}
+
+.tabActive {
+  color: $color-background;
+  background: $color-primary;
+  border-color: $color-primary;
+}
+
+.sortSelect {
+  appearance: none;
+  border: 1px solid $color-border;
+  border-radius: $radius-md;
+  padding: 6px 28px 6px 10px;
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+  background: $color-background url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236C757D' stroke-width='2.5'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 8px center;
+  cursor: pointer;
+  outline: none;
+}
+
+// ============================================================
+// Count text
+// ============================================================
+.countText {
+  padding: 10px 16px 4px;
+  font-size: $font-size-xs;
+  color: $color-text-muted;
+  margin: 0;
+}
+
+// ============================================================
+// List
+// ============================================================
+.list {
+  @include flex-column;
+  gap: 10px;
+  padding: 4px 16px 16px;
+}
+
+.empty {
+  text-align: center;
+  padding: 48px 0;
+  font-size: $font-size-sm;
+  color: $color-text-muted;
+  margin: 0;
+}
+
+// ============================================================
+// Card
+// ============================================================
+.card {
+  @include button-reset;
+  display: flex;
+  width: 100%;
+  background: $color-background;
+  border-radius: $radius-xl;
+  box-shadow: $shadow-sm;
+  overflow: hidden;
+  text-align: left;
+  cursor: pointer;
+  transition: box-shadow $transition-fast;
+
+  &:active {
+    box-shadow: $shadow-md;
+  }
+}
+
+.cardAccent {
+  width: 4px;
+  flex-shrink: 0;
+  border-radius: $radius-xl 0 0 $radius-xl;
+}
+
+.cardContent {
+  flex: 1;
+  padding: 14px 14px 12px;
+  @include flex-column;
+  gap: 7px;
+  min-width: 0;
+}
+
+.cardTop {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border-radius: $radius-full;
+  font-size: 11px;
+  font-weight: $font-weight-semibold;
+}
+
+.badgeShared {
+  background: rgba(#52B788, 0.15);
+  color: $color-primary;
+}
+
+.badgeRecruiting {
+  background: rgba(#1971C2, 0.12);
+  color: #1971C2;
+}
+
+.recruitCount {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  color: #1971C2;
+  font-weight: $font-weight-medium;
+}
+
+.cardDate {
+  margin-left: auto;
+  font-size: 11px;
+  color: $color-text-muted;
+}
+
+.cardTitle {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-bold;
+  color: $color-text;
+  margin: 0;
+  line-height: 1.4;
+  @include truncate(2);
+}
+
+.cardTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.cardTag {
+  font-size: 11px;
+  color: $color-primary;
+  font-weight: $font-weight-medium;
+}
+
+.cardFoot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cardMeta {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: $color-text-muted;
+}
+
+.dot {
+  color: $color-border;
+}
+
+.cardStats {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: $color-text-muted;
+
+  span {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+  }
+}
+
+// ============================================================
+// Pagination
+// ============================================================
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 4px 16px 24px;
+}
+
+.pageBtn {
+  @include button-reset;
+  width: 34px;
+  height: 34px;
+  border-radius: $radius-full;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: $color-text-muted;
+  background: $color-background;
+  border: 1px solid $color-border;
+  cursor: pointer;
+  transition: all $transition-fast;
+
+  &:disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
+
+  &:not(:disabled):active {
+    background: $color-background-gray;
+  }
+}
+
+.pageNum {
+  @include button-reset;
+  width: 34px;
+  height: 34px;
+  border-radius: $radius-full;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  background: $color-background;
+  border: 1px solid $color-border;
+  cursor: pointer;
+  transition: all $transition-fast;
+
+  &:active {
+    opacity: 0.8;
+  }
+}
+
+.pageNumActive {
+  color: $color-background;
+  background: $color-primary;
+  border-color: $color-primary;
+  font-weight: $font-weight-semibold;
+}

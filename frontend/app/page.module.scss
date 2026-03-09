@@ -1,0 +1,355 @@
+@import "../styles/variables";
+@import "../styles/mixins";
+
+.page {
+  @include flex-column;
+  background: $color-background-gray;
+  min-height: 100%;
+}
+
+// ============================================================
+// Header
+// ============================================================
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  height: $header-height;
+  background: $color-background;
+  border-bottom: 1px solid $color-border-light;
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: $z-index-header;
+}
+
+.headerLogo {
+  font-size: 18px;
+  font-weight: $font-weight-bold;
+  color: $color-primary;
+  letter-spacing: -0.3px;
+}
+
+.bellBtn {
+  @include button-reset;
+  position: relative;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: $color-text;
+  cursor: pointer;
+}
+
+.bellDot {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 7px;
+  height: 7px;
+  border-radius: $radius-full;
+  background: $color-error;
+  border: 1.5px solid $color-background;
+}
+
+// ============================================================
+// Profile card
+// ============================================================
+.profileCard {
+  margin: 16px;
+  background: $color-background;
+  border-radius: $radius-xl;
+  padding: 20px;
+  box-shadow: $shadow-sm;
+  @include flex-column;
+  gap: 16px;
+}
+
+.profileLeft {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: $radius-full;
+  background: linear-gradient(135deg, $color-primary, $color-primary-light);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  font-weight: $font-weight-bold;
+  flex-shrink: 0;
+}
+
+.profileInfo {
+  @include flex-column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.greeting {
+  font-size: $font-size-xs;
+  color: $color-text-muted;
+  margin: 0;
+}
+
+.nickname {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-bold;
+  color: $color-text;
+  margin: 0;
+}
+
+.email {
+  font-size: $font-size-xs;
+  color: $color-text-muted;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.statsRow {
+  display: flex;
+  align-items: center;
+  background: $color-background-gray;
+  border-radius: $radius-lg;
+  padding: 12px 0;
+}
+
+.statItem {
+  flex: 1;
+  @include flex-column;
+  align-items: center;
+  gap: 3px;
+}
+
+.statNum {
+  font-size: 20px;
+  font-weight: $font-weight-bold;
+  color: $color-primary;
+  line-height: 1;
+}
+
+.statLabel {
+  font-size: $font-size-xs;
+  color: $color-text-muted;
+}
+
+.statDivider {
+  width: 1px;
+  height: 28px;
+  background: $color-border;
+}
+
+// ============================================================
+// Quick menu
+// ============================================================
+.quickMenu {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  padding: 0 16px 4px;
+}
+
+.quickItem {
+  @include flex-column;
+  align-items: center;
+  gap: 6px;
+  padding: 14px 8px;
+  background: $color-background;
+  border-radius: $radius-xl;
+  text-decoration: none;
+  box-shadow: $shadow-sm;
+  transition: background $transition-fast;
+
+  &:active {
+    background: $color-background-gray;
+  }
+}
+
+.quickIcon {
+  width: 44px;
+  height: 44px;
+  border-radius: $radius-full;
+  background: rgba(#2D6A4F, 0.1);
+  color: $color-primary;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.quickLabel {
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+  color: $color-text-secondary;
+}
+
+// ============================================================
+// Section
+// ============================================================
+.section {
+  padding: 20px 0 4px;
+}
+
+.sectionHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px 12px;
+}
+
+.sectionTitle {
+  font-size: $font-size-base;
+  font-weight: $font-weight-bold;
+  color: $color-text;
+  margin: 0;
+}
+
+.sectionMore {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  font-size: $font-size-xs;
+  color: $color-text-muted;
+  text-decoration: none;
+
+  &:active {
+    opacity: 0.7;
+  }
+}
+
+// ============================================================
+// Course cards (horizontal scroll)
+// ============================================================
+.cardScroll {
+  display: flex;
+  gap: 12px;
+  padding: 0 16px 16px;
+  overflow-x: auto;
+  @include hide-scrollbar;
+}
+
+.courseCard {
+  width: 180px;
+  flex-shrink: 0;
+  background: $color-background;
+  border-radius: $radius-xl;
+  overflow: hidden;
+  box-shadow: $shadow-sm;
+  border: 1px solid $color-border-light;
+}
+
+.courseCardThumb {
+  position: relative;
+  height: 110px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 10px;
+}
+
+.recruitBadge {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background: rgba(0, 0, 0, 0.35);
+  border-radius: $radius-full;
+  font-size: 11px;
+  color: #fff;
+  font-weight: $font-weight-semibold;
+  backdrop-filter: blur(4px);
+}
+
+.courseCardTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-self: flex-end;
+}
+
+.courseCardTag {
+  display: inline-flex;
+  padding: 3px 8px;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: $radius-full;
+  font-size: 10px;
+  color: #fff;
+  font-weight: $font-weight-medium;
+  backdrop-filter: blur(4px);
+}
+
+.courseCardBody {
+  padding: 10px 12px 12px;
+  @include flex-column;
+  gap: 5px;
+}
+
+.courseCardTitle {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-bold;
+  color: $color-text;
+  margin: 0;
+  @include truncate(2);
+  line-height: 1.4;
+}
+
+.courseCardMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  span {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 11px;
+    color: $color-text-muted;
+  }
+}
+
+.courseCardFoot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 2px;
+}
+
+.courseCardAuthor {
+  font-size: 11px;
+  color: $color-text-muted;
+}
+
+.courseCardLikes {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  color: $color-text-muted;
+}
+
+// ============================================================
+// Recruit progress bar
+// ============================================================
+.progressWrap {
+  height: 4px;
+  background: $color-border-light;
+  border-radius: $radius-full;
+  overflow: hidden;
+  margin-top: 4px;
+}
+
+.progressBar {
+  height: 100%;
+  background: $color-primary;
+  border-radius: $radius-full;
+  transition: width $transition-base;
+}

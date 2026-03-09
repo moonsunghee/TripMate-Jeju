@@ -1,0 +1,395 @@
+@import "../../styles/variables";
+@import "../../styles/mixins";
+
+.page {
+  @include flex-column;
+  background: $color-background-gray;
+  min-height: 100%;
+}
+
+// ============================================================
+// Header
+// ============================================================
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  height: $header-height;
+  background: $color-background;
+  border-bottom: 1px solid $color-border-light;
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: $z-index-header;
+}
+
+.headerTitle {
+  font-size: $font-size-base;
+  font-weight: $font-weight-bold;
+  color: $color-text;
+  margin: 0;
+}
+
+.addBtn {
+  @include button-reset;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 7px 14px;
+  background: $color-primary;
+  color: #fff;
+  border-radius: $radius-full;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  cursor: pointer;
+  transition: opacity $transition-fast;
+
+  &:active {
+    opacity: 0.85;
+  }
+}
+
+// ============================================================
+// Stats row
+// ============================================================
+.statsRow {
+  display: flex;
+  align-items: center;
+  background: $color-background;
+  border-bottom: 1px solid $color-border-light;
+  padding: 14px 0;
+}
+
+.statItem {
+  flex: 1;
+  @include flex-column;
+  align-items: center;
+  gap: 3px;
+}
+
+.statNum {
+  font-size: 20px;
+  font-weight: $font-weight-bold;
+  color: $color-primary;
+  line-height: 1;
+}
+
+.statLabel {
+  font-size: $font-size-xs;
+  color: $color-text-muted;
+}
+
+.statDivider {
+  width: 1px;
+  height: 28px;
+  background: $color-border;
+}
+
+// ============================================================
+// Tabs
+// ============================================================
+.tabs {
+  display: flex;
+  background: $color-background;
+  border-bottom: 1px solid $color-border-light;
+  padding: 0 16px;
+  gap: 4px;
+}
+
+.tab {
+  @include button-reset;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 12px 12px;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $color-text-muted;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: all $transition-fast;
+  white-space: nowrap;
+
+  &:active {
+    opacity: 0.7;
+  }
+}
+
+.tabActive {
+  color: $color-primary;
+  border-bottom-color: $color-primary;
+  font-weight: $font-weight-semibold;
+}
+
+.tabCount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: $radius-full;
+  font-size: 11px;
+  font-weight: $font-weight-semibold;
+  background: $color-border-light;
+  color: $color-text-muted;
+}
+
+.tabCountActive {
+  background: rgba(#2D6A4F, 0.12);
+  color: $color-primary;
+}
+
+// ============================================================
+// List
+// ============================================================
+.list {
+  @include flex-column;
+  gap: 12px;
+  padding: 14px 16px 24px;
+}
+
+// ============================================================
+// Empty
+// ============================================================
+.empty {
+  @include flex-column;
+  align-items: center;
+  gap: 12px;
+  padding: 56px 0;
+}
+
+.emptyText {
+  font-size: $font-size-sm;
+  color: $color-text-muted;
+  margin: 0;
+}
+
+.emptyBtn {
+  @include button-reset;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 20px;
+  background: $color-primary;
+  color: #fff;
+  border-radius: $radius-full;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  cursor: pointer;
+  transition: opacity $transition-fast;
+
+  &:active {
+    opacity: 0.85;
+  }
+}
+
+// ============================================================
+// Card
+// ============================================================
+.card {
+  background: $color-background;
+  border-radius: $radius-xl;
+  box-shadow: $shadow-sm;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+// Thumbnail
+.thumb {
+  position: relative;
+  height: 120px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 12px;
+}
+
+.thumbTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.thumbTag {
+  display: inline-flex;
+  padding: 3px 9px;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: $radius-full;
+  font-size: 11px;
+  color: #fff;
+  font-weight: $font-weight-medium;
+  backdrop-filter: blur(4px);
+}
+
+.thumbMeta {
+  align-self: flex-end;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: $radius-full;
+  font-size: 11px;
+  color: #fff;
+  font-weight: $font-weight-medium;
+  backdrop-filter: blur(4px);
+}
+
+// Body
+.body {
+  padding: 14px 14px 12px;
+  @include flex-column;
+  gap: 7px;
+}
+
+.bodyTop {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+// Badges
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 9px;
+  border-radius: $radius-full;
+  font-size: 11px;
+  font-weight: $font-weight-semibold;
+}
+
+.badge_shared {
+  background: rgba(#52B788, 0.15);
+  color: $color-primary;
+}
+
+.badge_recruiting {
+  background: rgba(#1971C2, 0.12);
+  color: #1971C2;
+}
+
+.badge_draft {
+  background: rgba(#F59F00, 0.15);
+  color: #E67700;
+}
+
+.recruitCount {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  color: #1971C2;
+  font-weight: $font-weight-medium;
+}
+
+// More menu
+.moreWrap {
+  margin-left: auto;
+  position: relative;
+}
+
+.moreBtn {
+  @include button-reset;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: $color-text-muted;
+  border-radius: $radius-full;
+  cursor: pointer;
+  transition: background $transition-fast;
+
+  &:active {
+    background: $color-background-gray;
+  }
+}
+
+.dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  background: $color-background;
+  border: 1px solid $color-border-light;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-md;
+  overflow: hidden;
+  z-index: $z-index-dropdown;
+  min-width: 130px;
+}
+
+.dropdownItem {
+  @include button-reset;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 11px 16px;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  cursor: pointer;
+  transition: background $transition-fast;
+
+  &:active {
+    background: $color-background-gray;
+  }
+}
+
+.dropdownItemDanger {
+  color: $color-error;
+}
+
+// Title
+.title {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-bold;
+  color: $color-text;
+  margin: 0;
+  line-height: 1.4;
+  @include truncate(2);
+}
+
+// Meta
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  span {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 11px;
+    color: $color-text-muted;
+  }
+}
+
+// Footer
+.foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 2px;
+}
+
+.updatedAt {
+  font-size: 11px;
+  color: $color-text-muted;
+}
+
+.stats {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  span {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 11px;
+    color: $color-text-muted;
+  }
+}
