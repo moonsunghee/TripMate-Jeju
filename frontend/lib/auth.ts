@@ -1,4 +1,5 @@
 const TOKEN_KEY = "access_token";
+const MOCK_USER_KEY = "mock_user";
 const COOKIE_MAX_AGE = 60 * 60 * 24 * 7; // 7일
 
 export const authStorage = {
@@ -10,9 +11,19 @@ export const authStorage = {
   getToken: (): string | null => localStorage.getItem(TOKEN_KEY),
   clear: () => {
     localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(MOCK_USER_KEY);
     document.cookie = `${TOKEN_KEY}=; path=/; max-age=0`;
   },
   isLoggedIn: (): boolean => !!localStorage.getItem(TOKEN_KEY),
+
+  // 데모 로그인용 mock 유저 저장
+  setMockUser: (user: UserResponse) => {
+    localStorage.setItem(MOCK_USER_KEY, JSON.stringify(user));
+  },
+  getMockUser: (): UserResponse | null => {
+    const raw = localStorage.getItem(MOCK_USER_KEY);
+    return raw ? (JSON.parse(raw) as UserResponse) : null;
+  },
 };
 
 export interface TokenResponse {

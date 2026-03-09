@@ -74,6 +74,24 @@
   }
 }
 
+// 데모 로그인
+.demoBtn {
+  width: 100%;
+  height: 52px;
+  background: transparent;
+  border: 2px dashed $color-primary;
+  border-radius: $radius-md;
+  font-size: $font-size-base;
+  font-weight: $font-weight-semibold;
+  color: $color-primary;
+  cursor: pointer;
+  transition: background $transition-fast;
+
+  &:active {
+    background: rgba(#2D6A4F, 0.06);
+  }
+}
+
 // 구분선
 .dividerWrap {
   position: relative;

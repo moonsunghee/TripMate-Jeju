@@ -45,8 +45,14 @@ export default function HomePage() {
     api.get<UserResponse>("/api/auth/me")
       .then(setUser)
       .catch(() => {
-        authStorage.clear();
-        router.push("/login");
+        // API 연결 불가 시 mock 유저로 폴백 (데모 모드)
+        const mockUser = authStorage.getMockUser();
+        if (mockUser) {
+          setUser(mockUser);
+        } else {
+          authStorage.clear();
+          router.push("/login");
+        }
       });
   }, [router]);
 

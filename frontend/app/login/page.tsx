@@ -18,6 +18,21 @@ function LoginForm() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const handleDemoLogin = () => {
+    const demoUser = {
+      id: 0,
+      email: "demo@tripmate.kr",
+      nickname: "데모유저",
+      profile_image: null,
+      bio: null,
+      created_at: new Date().toISOString(),
+    };
+    authStorage.setToken("demo-token");
+    authStorage.setMockUser(demoUser);
+    const next = searchParams.get("next") ?? "/";
+    router.push(next);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) return;
@@ -76,9 +91,17 @@ function LoginForm() {
         </button>
       </form>
 
-      {/* 소셜 로그인 */}
+      {/* 데모 로그인 */}
       <div className={styles.dividerWrap}>
         <span className={styles.divider}>또는</span>
+      </div>
+      <button type="button" className={styles.demoBtn} onClick={handleDemoLogin}>
+        🧭 회원가입 없이 둘러보기
+      </button>
+
+      {/* 소셜 로그인 */}
+      <div className={styles.dividerWrap}>
+        <span className={styles.divider}>소셜 로그인</span>
       </div>
 
       <div className={styles.socialBtns}>
