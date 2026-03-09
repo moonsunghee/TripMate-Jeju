@@ -187,9 +187,9 @@ export default function MyCoursesPage() {
           <div
             key={course.id}
             className={styles.card}
-            onClick={(e) => {
-              e.stopPropagation();
+            onClick={() => {
               setMenuOpen(null);
+              router.push(`/my-courses/${course.id}`);
             }}
           >
             {/* Thumbnail */}

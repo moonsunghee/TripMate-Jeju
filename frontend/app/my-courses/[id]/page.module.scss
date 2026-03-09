@@ -1,0 +1,456 @@
+@import "../../../styles/variables";
+@import "../../../styles/mixins";
+
+$btn-dark: #1e1e1e;
+$btn-default: #e0e0e0;
+$header-bg: #f0f0f0;
+
+// ============================================================
+// Page
+// ============================================================
+.page {
+  @include flex-column;
+  height: 100%;
+  background: $color-background-gray;
+}
+
+.scroll {
+  flex: 1;
+  overflow-y: auto;
+}
+
+// ============================================================
+// Header
+// ============================================================
+.header {
+  display: flex;
+  align-items: center;
+  padding: 0 10px 0 4px;
+  height: 56px;
+  background: $header-bg;
+  flex-shrink: 0;
+  gap: 8px;
+}
+
+.backBtn {
+  @include button-reset;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  color: $color-text;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.headerTitle {
+  font-size: 20px;
+  font-weight: $font-weight-bold;
+  color: $color-text;
+  flex: 1;
+}
+
+.headerBadge {
+  flex-shrink: 0;
+  padding: 4px 10px;
+  border-radius: $radius-full;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-semibold;
+  margin-right: 6px;
+}
+
+.badge_shared {
+  background: rgba($color-primary, 0.12);
+  color: $color-primary;
+}
+
+.badge_recruiting {
+  background: rgba(#E67700, 0.12);
+  color: #E67700;
+}
+
+.badge_draft {
+  background: #e9ecef;
+  color: $color-text-muted;
+}
+
+// ============================================================
+// Title + Tags
+// ============================================================
+.titleSection {
+  background: $color-background;
+  padding: 20px 16px 16px;
+  @include flex-column;
+  gap: 12px;
+}
+
+.title {
+  font-size: 22px;
+  font-weight: $font-weight-bold;
+  color: $color-text;
+  line-height: 1.35;
+  margin: 0;
+}
+
+.tagScroll {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  @include hide-scrollbar;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 14px;
+  border-radius: $radius-full;
+  border: 1.5px solid $color-border;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  font-weight: $font-weight-medium;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+// ============================================================
+// Map placeholder
+// ============================================================
+.map {
+  width: 100%;
+  height: 240px;
+  background: #dce8e0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.mapIcon {
+  color: $color-primary;
+  opacity: 0.5;
+}
+
+.mapText {
+  font-size: $font-size-sm;
+  color: $color-text-muted;
+  margin: 0;
+}
+
+// ============================================================
+// Stats bar
+// ============================================================
+.stats {
+  display: flex;
+  align-items: center;
+  background: $color-background;
+  border-top: 1px solid $color-border-light;
+  border-bottom: 1px solid $color-border-light;
+  padding: 14px 0;
+  flex-shrink: 0;
+}
+
+.statItem {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $color-text-secondary;
+}
+
+.statDivider {
+  width: 1px;
+  height: 20px;
+  background: $color-border;
+  flex-shrink: 0;
+}
+
+// ============================================================
+// Recruit status strip
+// ============================================================
+.recruitStrip {
+  background: $color-background;
+  padding: 12px 16px;
+  border-bottom: 1px solid $color-border-light;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  row-gap: 8px;
+}
+
+.recruitLeft {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+}
+
+.recruitIcon {
+  color: $color-primary;
+}
+
+.recruitText {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+
+  strong {
+    font-weight: $font-weight-bold;
+    color: $color-text;
+  }
+}
+
+.fullBadge {
+  padding: 2px 8px;
+  background: rgba(#DC3545, 0.1);
+  color: $color-error;
+  border-radius: $radius-full;
+  font-size: 11px;
+  font-weight: $font-weight-semibold;
+}
+
+.recruitRight {
+  flex-shrink: 0;
+}
+
+.deadlineText {
+  font-size: $font-size-xs;
+  color: $color-text-muted;
+}
+
+.recruitBarWrap {
+  width: 100%;
+  height: 4px;
+  background: $color-border-light;
+  border-radius: $radius-full;
+  overflow: hidden;
+}
+
+.recruitBar {
+  height: 100%;
+  background: $color-primary;
+  border-radius: $radius-full;
+  transition: width $transition-base;
+}
+
+// ============================================================
+// Day tabs
+// ============================================================
+.dayTabsSection {
+  background: $color-background;
+  padding: 16px;
+  flex-shrink: 0;
+  border-bottom: 1px solid $color-border-light;
+}
+
+.dayTabs {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  @include hide-scrollbar;
+}
+
+.dayTab {
+  @include button-reset;
+  flex: 1;
+  min-width: 72px;
+  height: 52px;
+  border-radius: $radius-lg;
+  background: #e9ecef;
+  font-size: $font-size-base;
+  font-weight: $font-weight-bold;
+  color: $color-text-secondary;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background $transition-fast, color $transition-fast;
+}
+
+.dayTabActive {
+  background: $btn-dark;
+  color: #fff;
+}
+
+// ============================================================
+// Schedule
+// ============================================================
+.scheduleSection {
+  padding: 16px;
+  @include flex-column;
+}
+
+.scheduleRow {
+  display: flex;
+  gap: 10px;
+  align-items: stretch;
+}
+
+.scheduleLeft {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+  width: 34px;
+}
+
+.scheduleNum {
+  width: 34px;
+  height: 34px;
+  border-radius: $radius-full;
+  background: #e9ecef;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-bold;
+  color: $color-text;
+  flex-shrink: 0;
+}
+
+.scheduleConn {
+  flex: 1;
+  width: 2px;
+  background: repeating-linear-gradient(
+    to bottom,
+    #ccc 0px,
+    #ccc 5px,
+    transparent 5px,
+    transparent 10px
+  );
+  margin: 4px 0;
+  min-height: 20px;
+}
+
+.scheduleRight {
+  flex: 1;
+  @include flex-column;
+  min-width: 0;
+}
+
+.scheduleCard {
+  background: $color-background;
+  border: 1.5px solid $color-border;
+  border-radius: $radius-xl;
+  padding: 14px;
+  @include flex-column;
+  gap: 8px;
+  box-shadow: 0px 2px 10px 0px rgba(0, 0, 0, 0.08);
+}
+
+.scheduleCardTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.scheduleCardCategory {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: $font-size-base;
+  font-weight: $font-weight-bold;
+  color: $color-text;
+}
+
+.scheduleCardDuration {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: $font-size-xs;
+  color: $color-text-muted;
+  flex-shrink: 0;
+}
+
+.scheduleCardAddrRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.scheduleCardAddr {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  line-height: 1.5;
+}
+
+.copyBtn {
+  @include button-reset;
+  flex-shrink: 0;
+  padding: 4px 10px;
+  background: #e9ecef;
+  border-radius: $radius-sm;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+  color: $color-text;
+  cursor: pointer;
+}
+
+.transportRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 4px;
+  font-size: $font-size-sm;
+  color: $color-text-muted;
+}
+
+// ============================================================
+// Bottom spacer + bar
+// ============================================================
+.bottomSpacer {
+  height: calc(72px + env(safe-area-inset-bottom));
+}
+
+.bottomBar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 20px;
+  padding-bottom: calc(10px + env(safe-area-inset-bottom));
+  background: $color-background;
+  flex-shrink: 0;
+  border-top: 1px solid $color-border-light;
+}
+
+.btnEdit {
+  @include button-reset;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 90px;
+  height: 52px;
+  border-radius: 6px;
+  background: $btn-default;
+  font-size: 16px;
+  font-weight: $font-weight-semibold;
+  color: $btn-dark;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.btnShare {
+  @include button-reset;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex: 1;
+  height: 52px;
+  border-radius: 6px;
+  background: $btn-dark;
+  font-size: 16px;
+  font-weight: $font-weight-bold;
+  color: #e0e0e0;
+  cursor: pointer;
+}
