@@ -425,6 +425,48 @@
 
 ---
 
+## 소셜 로그인 OAuth 키 등록 가이드
+
+> 키 입력 위치: `backend/.env`
+
+### 카카오
+1. https://developers.kakao.com → 내 애플리케이션 → 애플리케이션 추가
+2. 앱 설정 → 앱 키 → **REST API 키** → `KAKAO_CLIENT_ID`
+3. 제품 설정 → 카카오 로그인 → 활성화 ON
+4. Redirect URI 등록: `http://localhost:8000/api/auth/kakao/callback`
+5. 보안 → Client Secret 생성 → `KAKAO_CLIENT_SECRET`
+6. 동의항목: 닉네임(필수), 이메일(선택)
+
+### 네이버
+1. https://developers.naver.com → Application → 애플리케이션 등록
+2. 사용 API: **네아로(네이버 아이디로 로그인)** 선택
+3. 서비스 URL: `http://localhost:3000`
+4. Callback URL: `http://localhost:8000/api/auth/naver/callback`
+5. 발급된 Client ID → `NAVER_CLIENT_ID` / Client Secret → `NAVER_CLIENT_SECRET`
+
+### 구글
+1. https://console.cloud.google.com → 새 프로젝트
+2. API 및 서비스 → OAuth 동의 화면 → 외부 → 앱 정보 입력
+3. 사용자 인증 정보 → OAuth 클라이언트 ID 만들기 → 웹 애플리케이션
+4. 승인된 리디렉션 URI: `http://localhost:8000/api/auth/google/callback`
+5. 발급된 클라이언트 ID → `GOOGLE_CLIENT_ID` / 보안 비밀 → `GOOGLE_CLIENT_SECRET`
+
+### 카카오 지도 (JavaScript 키)
+- 카카오 개발자 콘솔 → 앱 설정 → 앱 키 → **JavaScript 키**
+- 입력 위치: `frontend/.env.local`의 `NEXT_PUBLIC_KAKAO_MAP_KEY=`
+- 소셜 로그인용 앱과 **동일한 앱**에서 발급받으면 됨
+- 사용 범위: 내 코스 상세, 게시판 코스 상세 지도 + 하루 경로 표시
+
+### 배포 시 추가 설정
+- `backend/.env`에 추가:
+  ```
+  FRONTEND_URL=https://tm-jeju.vercel.app
+  BACKEND_URL=https://your-backend-domain.com
+  ```
+- 각 플랫폼 콘솔에서 Redirect URI에 배포 URL도 추가 등록
+
+---
+
 ## 메모 / 결정 사항
 
 > 작업 중 결정된 사항이나 참고할 내용을 여기에 기록해 주세요.

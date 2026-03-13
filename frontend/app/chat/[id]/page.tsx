@@ -3,55 +3,79 @@
 import { useState, useRef, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { RiArrowLeftLine, RiMoreLine, RiSendPlaneFill } from "react-icons/ri";
+import { api } from "@/lib/api";
+import type { ChatMessage, DirectMessage } from "@/lib/types";
+import { authStorage } from "@/lib/auth";
 import styles from "./page.module.scss";
 
-// ============================================================
-// Types & Mock Data
-// ============================================================
-type Message = {
-  id: string;
-  senderId: string;
+interface DisplayMessage {
+  id: number;
+  senderId: number;
   senderName: string;
   text: string;
   time: string;
   isMe: boolean;
-};
+}
 
-const ROOM_NAMES: Record<string, string> = {
-  g1: "제주 자연 힐링 코스",
-  g2: "제주 미식 탐방 코스",
-  g3: "제주 액티비티 코스",
-  d1: "김제주",
-  d2: "이올레",
-};
+function formatTime(iso: string) {
+  return new Date(iso).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit", hour12: true });
+}
 
-const ROOM_MEMBER_COUNT: Record<string, number | undefined> = {
-  g1: 4, g2: 3, g3: 5,
-};
+function getMeId(): number | null {
+  const raw = localStorage.getItem("access_token");
+  if (!raw) return null;
+  try {
+    const payload = JSON.parse(atob(raw.split(".")[1]));
+    return Number(payload.sub);
+  } catch { return null; }
+}
 
-const INITIAL_MESSAGES: Message[] = [
-  { id: "1", senderId: "u2", senderName: "김제주", text: "안녕하세요! 내일 코스 확인하셨나요?", time: "오전 10:05", isMe: false },
-  { id: "2", senderId: "me", senderName: "나", text: "네, 확인했어요! 성산일출봉 먼저 가는 거죠?", time: "오전 10:07", isMe: true },
-  { id: "3", senderId: "u3", senderName: "이올레", text: "맞아요~ 8시에 출발하면 될 것 같아요", time: "오전 10:10", isMe: false },
-  { id: "4", senderId: "me", senderName: "나", text: "좋아요! 어디서 만날까요?", time: "오전 10:12", isMe: true },
-  { id: "5", senderId: "u2", senderName: "김제주", text: "제주공항 1번 출구 어때요?", time: "오전 10:15", isMe: false },
-  { id: "6", senderId: "u3", senderName: "이올레", text: "좋아요 거기서 봐요!", time: "오전 10:16", isMe: false },
-  { id: "7", senderId: "me", senderName: "나", text: "내일 몇 시에 출발하나요?", time: "오후 3:12", isMe: true },
-];
-
-// ============================================================
-// Page
-// ============================================================
 export default function ChatRoomPage() {
   const router = useRouter();
   const { id } = useParams<{ id: string }>();
-  const [messages, setMessages] = useState<Message[]>(INITIAL_MESSAGES);
+  const [messages, setMessages] = useState<DisplayMessage[]>([]);
   const [input, setInput] = useState("");
+  const [roomName, setRoomName] = useState("채팅방");
+  const [sending, setSending] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const roomName = ROOM_NAMES[id] ?? "채팅방";
-  const memberCount = ROOM_MEMBER_COUNT[id];
+  const isGroup = id.startsWith("g");
+  const numericId = parseInt(id.slice(1), 10);
+
+  useEffect(() => {
+    const meId = getMeId();
+    if (isGroup) {
+      setRoomName(`그룹 채팅 #${numericId}`);
+      api.get<ChatMessage[]>(`/api/chat/rooms/${numericId}/messages`)
+        .then((msgs) => {
+          setMessages(msgs.map((m) => ({
+            id: m.id,
+            senderId: m.user_id,
+            senderName: m.user?.nickname ?? "알 수 없음",
+            text: m.message,
+            time: formatTime(m.created_at),
+            isMe: m.user_id === meId,
+          })));
+        }).catch(() => {});
+    } else {
+      api.get<DirectMessage[]>(`/api/chat/direct/${numericId}/messages`)
+        .then((msgs) => {
+          if (msgs.length > 0) {
+            const other = msgs.find((m) => m.sender_id !== meId);
+            setRoomName(other?.sender?.nickname ?? "1:1 채팅");
+          }
+          setMessages(msgs.map((m) => ({
+            id: m.id,
+            senderId: m.sender_id,
+            senderName: m.sender?.nickname ?? "알 수 없음",
+            text: m.message,
+            time: formatTime(m.created_at),
+            isMe: m.sender_id === meId,
+          })));
+        }).catch(() => {});
+    }
+  }, [id, numericId, isGroup]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "instant" });
@@ -61,17 +85,37 @@ export default function ChatRoomPage() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const sendMessage = () => {
+  const sendMessage = async () => {
     const text = input.trim();
-    if (!text) return;
-    const now = new Date();
-    const time = now.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit", hour12: true });
-    setMessages((prev) => [
-      ...prev,
-      { id: Date.now().toString(), senderId: "me", senderName: "나", text, time, isMe: true },
-    ]);
+    if (!text || sending) return;
+    setSending(true);
+
+    const meId = getMeId();
+    const now = new Date().toISOString();
+    const optimistic: DisplayMessage = {
+      id: Date.now(),
+      senderId: meId ?? 0,
+      senderName: "나",
+      text,
+      time: formatTime(now),
+      isMe: true,
+    };
+    setMessages((prev) => [...prev, optimistic]);
     setInput("");
     inputRef.current?.focus();
+
+    try {
+      if (isGroup) {
+        await api.post(`/api/chat/rooms/${numericId}/messages`, { message: text });
+      } else {
+        await api.post(`/api/chat/direct/${numericId}/messages`, { message: text });
+      }
+    } catch {
+      // 낙관적 업데이트 실패 시 제거
+      setMessages((prev) => prev.filter((m) => m.id !== optimistic.id));
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
@@ -83,7 +127,7 @@ export default function ChatRoomPage() {
         </button>
         <div className={styles.headerCenter}>
           <span className={styles.headerTitle}>{roomName}</span>
-          {memberCount && <span className={styles.headerSub}>{memberCount}명</span>}
+          {isGroup && <span className={styles.headerSub}>그룹</span>}
         </div>
         <button className={styles.moreBtn}>
           <RiMoreLine size={22} />
@@ -92,9 +136,13 @@ export default function ChatRoomPage() {
 
       {/* Messages */}
       <div className={styles.messages}>
-        <div className={styles.dateDivider}>
-          <span>오늘</span>
-        </div>
+        <div className={styles.dateDivider}><span>오늘</span></div>
+
+        {messages.length === 0 && (
+          <p style={{ textAlign: "center", color: "#868e96", padding: "2rem", fontSize: "14px" }}>
+            아직 메시지가 없습니다. 첫 메시지를 보내보세요!
+          </p>
+        )}
 
         {messages.map((msg, i) => {
           const prev = messages[i - 1];
@@ -102,7 +150,6 @@ export default function ChatRoomPage() {
 
           return (
             <div key={msg.id} className={`${styles.msgRow} ${msg.isMe ? styles.msgRowMe : ""}`}>
-              {/* Avatar (received only) */}
               {!msg.isMe && (
                 <div className={`${styles.msgAvatar} ${!showAvatar ? styles.msgAvatarHidden : ""}`}>
                   {msg.senderName[0]}
@@ -139,7 +186,7 @@ export default function ChatRoomPage() {
         <button
           className={`${styles.sendBtn} ${input.trim() ? styles.sendBtnActive : ""}`}
           onClick={sendMessage}
-          disabled={!input.trim()}
+          disabled={!input.trim() || sending}
         >
           <RiSendPlaneFill size={19} />
         </button>

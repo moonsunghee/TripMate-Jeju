@@ -1,56 +1,66 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { RiSearchLine, RiGroupLine } from "react-icons/ri";
+import { api } from "@/lib/api";
+import type { ChatRoom, DirectRoom } from "@/lib/types";
 import styles from "./page.module.scss";
-
-// ============================================================
-// Types & Mock Data
-// ============================================================
-type ChatRoom = {
-  id: string;
-  type: "group" | "direct";
-  name: string;
-  lastMessage: string;
-  time: string;
-  unread: number;
-  avatarText: string;
-  memberCount?: number;
-};
-
-const MOCK_CHATS: ChatRoom[] = [
-  { id: "g1", type: "group", name: "제주 자연 힐링 코스", lastMessage: "내일 몇 시에 출발하나요?", time: "오후 3:12", unread: 2, avatarText: "힐", memberCount: 4 },
-  { id: "g2", type: "group", name: "제주 미식 탐방 코스", lastMessage: "흑돼지 맛집 예약했어요!", time: "어제", unread: 0, avatarText: "미", memberCount: 3 },
-  { id: "g3", type: "group", name: "제주 액티비티 코스", lastMessage: "서핑 장비 대여 얼마예요?", time: "월요일", unread: 5, avatarText: "액", memberCount: 5 },
-  { id: "d1", type: "direct", name: "김제주", lastMessage: "네, 같이 가요!", time: "오후 1:30", unread: 1, avatarText: "김" },
-  { id: "d2", type: "direct", name: "이올레", lastMessage: "프로필 사진 귀엽네요 ㅎㅎ", time: "화요일", unread: 0, avatarText: "이" },
-];
 
 type TabType = "all" | "group" | "direct";
 
-// ============================================================
-// Page
-// ============================================================
+interface UnifiedRoom {
+  id: string;   // "g{id}" for group, "d{id}" for direct
+  type: "group" | "direct";
+  name: string;
+  avatarText: string;
+  time: string;
+}
+
 export default function ChatListPage() {
   const router = useRouter();
   const [tab, setTab] = useState<TabType>("all");
+  const [groupRooms, setGroupRooms] = useState<ChatRoom[]>([]);
+  const [directRooms, setDirectRooms] = useState<DirectRoom[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const filtered = MOCK_CHATS.filter((c) => {
+  useEffect(() => {
+    Promise.all([
+      api.get<ChatRoom[]>("/api/chat/rooms"),
+      api.get<DirectRoom[]>("/api/chat/direct"),
+    ]).then(([groups, directs]) => {
+      setGroupRooms(groups);
+      setDirectRooms(directs);
+    }).catch(() => {}).finally(() => setLoading(false));
+  }, []);
+
+  const allRooms: UnifiedRoom[] = [
+    ...groupRooms.map((r) => ({
+      id: `g${r.id}`,
+      type: "group" as const,
+      name: `그룹 채팅 #${r.post_id}`,
+      avatarText: "그",
+      time: r.created_at.slice(0, 10),
+    })),
+    ...directRooms.map((r) => ({
+      id: `d${r.id}`,
+      type: "direct" as const,
+      name: r.other_user?.nickname ?? "알 수 없음",
+      avatarText: (r.other_user?.nickname?.[0] ?? "?"),
+      time: r.created_at.slice(0, 10),
+    })),
+  ];
+
+  const filtered = allRooms.filter((r) => {
     if (tab === "all") return true;
-    return tab === "group" ? c.type === "group" : c.type === "direct";
+    return tab === r.type;
   });
-
-  const totalUnread = MOCK_CHATS.reduce((acc, c) => acc + c.unread, 0);
 
   return (
     <div className={styles.page}>
       {/* Header */}
       <div className={styles.header}>
-        <h1 className={styles.headerTitle}>
-          채팅
-          {totalUnread > 0 && <span className={styles.headerBadge}>{totalUnread}</span>}
-        </h1>
+        <h1 className={styles.headerTitle}>채팅</h1>
         <button className={styles.iconBtn}>
           <RiSearchLine size={22} />
         </button>
@@ -71,32 +81,31 @@ export default function ChatListPage() {
 
       {/* List */}
       <div className={styles.list}>
-        {filtered.length === 0 && (
+        {loading && (
+          <p style={{ textAlign: "center", color: "#868e96", padding: "2rem" }}>로딩 중...</p>
+        )}
+        {!loading && filtered.length === 0 && (
           <p className={styles.empty}>채팅방이 없습니다</p>
         )}
-        {filtered.map((chat) => (
+        {filtered.map((room) => (
           <button
-            key={chat.id}
+            key={room.id}
             className={styles.chatItem}
-            onClick={() => router.push(`/chat/${chat.id}`)}
+            onClick={() => router.push(`/chat/${room.id}`)}
           >
-            <div className={`${styles.avatar} ${chat.type === "group" ? styles.avatarGroup : ""}`}>
-              {chat.type === "group" ? <RiGroupLine size={20} /> : chat.avatarText}
+            <div className={`${styles.avatar} ${room.type === "group" ? styles.avatarGroup : ""}`}>
+              {room.type === "group" ? <RiGroupLine size={20} /> : room.avatarText}
             </div>
 
             <div className={styles.chatInfo}>
               <div className={styles.chatTop}>
-                <span className={styles.chatName}>{chat.name}</span>
-                {chat.type === "group" && chat.memberCount && (
-                  <span className={styles.memberCount}>{chat.memberCount}</span>
-                )}
-                <span className={styles.chatTime}>{chat.time}</span>
+                <span className={styles.chatName}>{room.name}</span>
+                <span className={styles.chatTime}>{room.time}</span>
               </div>
               <div className={styles.chatBottom}>
-                <span className={styles.chatLastMsg}>{chat.lastMessage}</span>
-                {chat.unread > 0 && (
-                  <span className={styles.unreadBadge}>{chat.unread}</span>
-                )}
+                <span className={styles.chatLastMsg}>
+                  {room.type === "group" ? "그룹 채팅방" : "1:1 채팅"}
+                </span>
               </div>
             </div>
           </button>

@@ -10,6 +10,8 @@ import { api, ApiError } from "@/lib/api";
 import { authStorage, type TokenResponse } from "@/lib/auth";
 import styles from "./page.module.scss";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -18,19 +20,19 @@ function LoginForm() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleDemoLogin = () => {
-    const demoUser = {
-      id: 0,
-      email: "demo@tripmate.kr",
-      nickname: "데모유저",
-      profile_image: null,
-      bio: null,
-      created_at: new Date().toISOString(),
-    };
-    authStorage.setToken("demo-token");
-    authStorage.setMockUser(demoUser);
-    const next = searchParams.get("next") ?? "/";
-    router.push(next);
+  const handleDemoLogin = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const data = await api.post<TokenResponse>("/api/auth/demo", {});
+      authStorage.setToken(data.access_token);
+      const next = searchParams.get("next") ?? "/";
+      router.push(next);
+    } catch {
+      setError("데모 로그인에 실패했습니다. 백엔드 서버를 확인해주세요.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -105,15 +107,24 @@ function LoginForm() {
       </div>
 
       <div className={styles.socialBtns}>
-        <button className={`${styles.socialBtn} ${styles.kakao}`}>
+        <button
+          className={`${styles.socialBtn} ${styles.kakao}`}
+          onClick={() => { window.location.href = `${API_URL}/api/auth/kakao/login`; }}
+        >
           <RiKakaoTalkFill size={22} />
           <span>카카오로 계속하기</span>
         </button>
-        <button className={`${styles.socialBtn} ${styles.naver}`}>
+        <button
+          className={`${styles.socialBtn} ${styles.naver}`}
+          onClick={() => { window.location.href = `${API_URL}/api/auth/naver/login`; }}
+        >
           <span className={styles.naverN}>N</span>
           <span>네이버로 계속하기</span>
         </button>
-        <button className={`${styles.socialBtn} ${styles.google}`}>
+        <button
+          className={`${styles.socialBtn} ${styles.google}`}
+          onClick={() => { window.location.href = `${API_URL}/api/auth/google/login`; }}
+        >
           <FcGoogle size={20} />
           <span>Google로 계속하기</span>
         </button>

@@ -1,7 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { api, ApiError } from "@/lib/api";
+import type { GeneratedCourse, Course } from "@/lib/types";
 import {
   RiArrowLeftLine, RiCheckLine,
   RiSunLine, RiCompass3Line, RiAnchorLine, RiRunLine, RiWalkLine,
@@ -223,17 +225,44 @@ export default function DesignPage() {
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [form, setForm] = useState<DesignFormData>(INITIAL_FORM);
+  const [generatedCourse, setGeneratedCourse] = useState<GeneratedCourse | null>(null);
+  const [saving, setSaving] = useState(false);
+  const generateCalled = useRef(false);
 
+  // step 5: AI 생성 호출
   useEffect(() => {
-    if (step === 5) {
-      const timer = setTimeout(() => setStep(6), 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [step]);
+    if (step !== 5) return;
+    if (generateCalled.current) return;
+    generateCalled.current = true;
+
+    const today = new Date();
+    const start = today.toISOString().slice(0, 10);
+    const end = new Date(today.setDate(today.getDate() + (form.durationDays ?? 1) - 1))
+      .toISOString().slice(0, 10);
+
+    api.post<GeneratedCourse>("/api/courses/generate", {
+      travel_style: form.purposes[0] ?? "휴양",
+      start_date: start,
+      end_date: end,
+      region: form.regions[0] ?? "제주시",
+      meal_count: 3,
+      tourist_count: 2,
+      transport: form.transports[0] ?? "렌터카",
+    }).then((data) => {
+      setGeneratedCourse(data);
+      setStep(6);
+    }).catch(() => {
+      // API 실패 시에도 step 6으로 이동 (mock 사용)
+      setStep(6);
+    });
+  }, [step, form]);
 
   const handleBack = () => {
     if (step === 1) router.back();
-    else setStep((s) => s - 1);
+    else {
+      if (step === 6) generateCalled.current = false; // 재생성 허용
+      setStep((s) => s - 1);
+    }
   };
 
   const handleNext = () => setStep((s) => s + 1);
@@ -247,9 +276,71 @@ export default function DesignPage() {
     return true;
   };
 
-  const handleSave = (isDraft: boolean) => {
-    alert(isDraft ? "임시저장 되었습니다." : "코스가 저장되었습니다.");
-    router.push("/my-courses");
+  const handleSave = async (isDraft: boolean) => {
+    setSaving(true);
+    try {
+      // 선택된 코스 데이터 구성
+      const selected = form.selectedCourseIndex !== null ? MOCK_COURSES[form.selectedCourseIndex] : null;
+      const aiPlaces = generatedCourse?.places ?? [];
+
+      // AI 생성 코스가 있고 index 0이면 AI 데이터 사용, 아니면 mock
+      const usedPlaces = (form.selectedCourseIndex === 0 && aiPlaces.length > 0)
+        ? aiPlaces.map((p) => ({
+            place_name: p.place_name,
+            category: p.category,
+            day: p.day,
+            visit_order: p.visit_order,
+            time: p.time,
+            memo: p.memo,
+          }))
+        : (selected?.days ?? []).flatMap((day, di) =>
+            day.items.map((item, ii) => ({
+              place_name: item.place,
+              category: item.category,
+              day: di + 1,
+              visit_order: ii + 1,
+              time: null,
+              memo: item.address,
+            }))
+          );
+
+      const title = form.courseName.trim() || generatedCourse?.title || selected?.title || "제주 여행 코스";
+      const today = new Date();
+      const start = today.toISOString().slice(0, 10);
+
+      const savedCourse = await api.post<Course>("/api/courses", {
+        title,
+        description: generatedCourse?.description ?? selected?.summary ?? null,
+        duration_days: form.durationDays,
+        travel_style: form.purposes[0] ?? null,
+        region: form.regions[0] ?? null,
+        transport: form.transports[0] ?? null,
+        is_shared: form.isShared,
+        is_recruiting: form.isRecruiting,
+        status: isDraft ? "draft" : (form.isRecruiting ? "recruiting" : form.isShared ? "sharing" : "master"),
+        start_date: start,
+        places: usedPlaces,
+      });
+
+      // 동행 모집 설정 시 companion post 자동 생성
+      if (!isDraft && form.isRecruiting && savedCourse) {
+        await api.post("/api/companion", {
+          course_id: savedCourse.id,
+          title,
+          content: generatedCourse?.description ?? null,
+          max_people: 4,
+          start_date: start,
+        }).catch(() => {});
+      }
+
+      alert(isDraft ? "임시저장 되었습니다." : "코스가 저장되었습니다.");
+      router.push("/my-courses");
+    } catch (e) {
+      if (e instanceof ApiError) alert(e.message);
+      else alert("저장에 실패했습니다.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const isLoading = step === 5;
@@ -271,18 +362,20 @@ export default function DesignPage() {
         {step === 3 && <TransportStep form={form} setForm={setForm} />}
         {step === 4 && <RegionStep form={form} setForm={setForm} />}
         {step === 5 && <LoadingStep />}
-        {step === 6 && <CourseSelectStep form={form} setForm={setForm} />}
-        {step === 7 && <CourseDetailStep form={form} />}
-        {step === 8 && <SaveStep form={form} setForm={setForm} onSave={handleSave} />}
+        {step === 6 && <CourseSelectStep form={form} setForm={setForm} generatedCourse={generatedCourse} />}
+        {step === 7 && <CourseDetailStep form={form} generatedCourse={generatedCourse} />}
+        {step === 8 && <SaveStep form={form} setForm={setForm} onSave={handleSave} saving={saving} />}
       </div>
 
       {!isLoading && (
         <div className={styles.bottomBar}>
           {isSave ? (
             <>
-              <button className={styles.btnPrev} onClick={handleBack}>이전</button>
-              <button className={styles.btnDraft} onClick={() => handleSave(true)}>임시저장</button>
-              <button className={styles.btnNext} onClick={() => handleSave(false)}>저장</button>
+              <button className={styles.btnPrev} onClick={handleBack} disabled={saving}>이전</button>
+              <button className={styles.btnDraft} onClick={() => handleSave(true)} disabled={saving}>임시저장</button>
+              <button className={styles.btnNext} onClick={() => handleSave(false)} disabled={saving}>
+                {saving ? "저장 중..." : "저장"}
+              </button>
             </>
           ) : step === 7 ? (
             <>
@@ -500,12 +593,26 @@ function LoadingStep() {
 // ============================================================
 // Step 6: 코스 선택
 // ============================================================
-function CourseSelectStep({ form, setForm }: StepProps) {
+function CourseSelectStep({ form, setForm, generatedCourse }: StepProps & { generatedCourse: GeneratedCourse | null }) {
+  // AI 생성 코스를 index 0 카드로 표시, 나머지 2개는 mock
+  const displayCourses = MOCK_COURSES.map((c, i) => {
+    if (i === 0 && generatedCourse) {
+      return {
+        title: generatedCourse.title,
+        summary: generatedCourse.description,
+        tags: ["AI 생성"],
+        region: "-",
+        duration: `${generatedCourse.places.filter((p, pi, arr) => arr.findIndex((x) => x.day === p.day) === pi).length}일`,
+      };
+    }
+    return { title: c.title, summary: c.summary, tags: c.tags, region: c.region, duration: c.duration };
+  });
+
   return (
     <div className={styles.stepContent}>
       <p className={styles.courseDesc}>마음에 드는 코스를 선택하세요</p>
       <div className={styles.courseList}>
-        {MOCK_COURSES.map((course, index) => (
+        {displayCourses.map((course, index) => (
           <button
             key={index}
             className={`${styles.courseCard} ${form.selectedCourseIndex === index ? styles.courseCardSelected : ""}`}
@@ -513,6 +620,7 @@ function CourseSelectStep({ form, setForm }: StepProps) {
           >
             <div className={styles.courseCardHeader}>
               <span className={styles.courseCardNum}>코스 {index + 1}</span>
+              {index === 0 && generatedCourse && <span style={{ fontSize: "11px", color: "#52B788" }}>AI 생성</span>}
               {form.selectedCourseIndex === index && <RiCheckLine size={18} />}
             </div>
             <h3 className={styles.courseCardTitle}>{course.title}</h3>
@@ -534,22 +642,49 @@ function CourseSelectStep({ form, setForm }: StepProps) {
 // ============================================================
 // Step 7: 코스 상세 확인
 // ============================================================
-function CourseDetailStep({ form }: { form: DesignFormData }) {
+function CourseDetailStep({ form, generatedCourse }: { form: DesignFormData; generatedCourse: GeneratedCourse | null }) {
   const [activeDay, setActiveDay] = useState(1);
-  const course = form.selectedCourseIndex !== null ? MOCK_COURSES[form.selectedCourseIndex] : null;
-  if (!course) return null;
 
-  const currentDay = course.days[activeDay - 1];
-  const items = currentDay?.items ?? [];
-  const transports = currentDay?.transports ?? [];
+  // index 0 + AI 생성 코스가 있으면 AI 데이터 사용
+  const useAI = form.selectedCourseIndex === 0 && generatedCourse;
+
+  const course = !useAI && form.selectedCourseIndex !== null ? MOCK_COURSES[form.selectedCourseIndex] : null;
+
+  // AI 코스를 mock 형태로 변환
+  const aiDays = useAI ? (() => {
+    const map = new Map<number, typeof generatedCourse.places>();
+    for (const p of generatedCourse.places) {
+      if (!map.has(p.day)) map.set(p.day, []);
+      map.get(p.day)!.push(p);
+    }
+    return Array.from(map.keys()).sort((a, b) => a - b).map((d) =>
+      map.get(d)!.sort((a, b) => a.visit_order - b.visit_order).map((p) => ({
+        category: p.category,
+        place: p.place_name,
+        duration: p.time ?? "-",
+        address: p.memo ?? "",
+      }))
+    );
+  })() : null;
+
+  const title = useAI ? generatedCourse.title : course?.title ?? "";
+  const tags = useAI ? ["AI 생성"] : (course?.tags ?? []);
+  const days = useAI ? aiDays! : (course?.days.map((d) => d.items) ?? []);
+  const allTransports = course?.days.map((d) => d.transports) ?? [];
+
+  if (!useAI && !course) return null;
+
+  const currentDay = days[activeDay - 1] ?? [];
+  const items = currentDay;
+  const transports = allTransports[activeDay - 1] ?? [];
 
   return (
     <div className={styles.detailWrap}>
       {/* Title + Tags */}
       <div className={styles.detailTitleSection}>
-        <h2 className={styles.detailTitle}>{course.title}</h2>
+        <h2 className={styles.detailTitle}>{title}</h2>
         <div className={styles.detailTagScroll}>
-          {course.tags.map((tag) => (
+          {tags.map((tag) => (
             <span key={tag} className={styles.detailTag}>{tag}</span>
           ))}
         </div>
@@ -565,24 +700,24 @@ function CourseDetailStep({ form }: { form: DesignFormData }) {
       <div className={styles.detailStats}>
         <div className={styles.detailStatItem}>
           <RiRouteLine size={16} />
-          <span>{course.distance}</span>
+          <span>{useAI ? (form.regions[0] ?? "-") : (course?.distance ?? "-")}</span>
         </div>
         <div className={styles.detailStatDivider} />
         <div className={styles.detailStatItem}>
           <RiCalendarLine size={16} />
-          <span>{course.duration}</span>
+          <span>{useAI ? `${days.length}일` : (course?.duration ?? "-")}</span>
         </div>
         <div className={styles.detailStatDivider} />
         <div className={styles.detailStatItem}>
           <RiHeartLine size={16} />
-          <span>{course.likes}</span>
+          <span>{useAI ? "AI" : (course?.likes ?? 0)}</span>
         </div>
       </div>
 
       {/* Day tabs */}
       <div className={styles.dayTabsSection}>
         <div className={styles.dayTabs}>
-          {course.days.map((_, i) => {
+          {days.map((_, i) => {
             const day = i + 1;
             return (
               <button
@@ -660,8 +795,8 @@ function CourseDetailStep({ form }: { form: DesignFormData }) {
 // Step 8: 저장 설정
 // ============================================================
 function SaveStep({
-  form, setForm, onSave,
-}: StepProps & { onSave: (isDraft: boolean) => void }) {
+  form, setForm, onSave, saving,
+}: StepProps & { onSave: (isDraft: boolean) => void; saving: boolean }) {
   const course = form.selectedCourseIndex !== null ? MOCK_COURSES[form.selectedCourseIndex] : null;
 
   return (

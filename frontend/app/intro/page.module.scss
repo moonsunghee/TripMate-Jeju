@@ -1,0 +1,268 @@
+@use "variables" as *;
+
+.page {
+  position: relative;
+  width: 100%;
+  min-height: 100dvh;
+  max-width: $mobile-max-width;
+  margin: 0 auto;
+  background: #D9ECFA;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+// ── Background blobs ──────────────────────────────────────
+.blobTopLeft {
+  position: absolute;
+  top: -60px;
+  left: -60px;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.25);
+  pointer-events: none;
+}
+
+.blobBottomRight {
+  position: absolute;
+  bottom: -40px;
+  right: -40px;
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  pointer-events: none;
+}
+
+// ── Floating circles ─────────────────────────────────────
+.floatCircle {
+  position: absolute;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 3px solid rgba(255, 255, 255, 0.8);
+}
+
+.circleInner {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+}
+
+.circleLg {
+  width: 200px;
+  height: 200px;
+}
+.circleMd {
+  width: 80px;
+  height: 80px;
+}
+.circleSm {
+  width: 64px;
+  height: 64px;
+}
+
+.circleCenter {
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 4px;
+  .circleInner {
+    background: linear-gradient(160deg, #7EB8D4 0%, #4A90B8 40%, #2D6A4F 100%);
+  }
+}
+
+.circleTopLeft {
+  top: 60px;
+  left: 28px;
+  .circleInner {
+    background: linear-gradient(135deg, #5B8FA8 0%, #3A7A6A 100%);
+  }
+}
+
+.circleTopRight {
+  top: 100px;
+  right: 16px;
+  .circleInner {
+    background: linear-gradient(135deg, #3D7A8A 0%, #1D5A7A 100%);
+  }
+}
+
+.circleBottomRight {
+  top: 260px;
+  right: 44px;
+  .circleInner {
+    background: linear-gradient(135deg, #B8860B 0%, #8B5E3C 100%);
+  }
+}
+
+// ── Badge ─────────────────────────────────────────────────
+.badge {
+  position: absolute;
+  top: 158px;
+  left: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff;
+  border-radius: 40px;
+  padding: 8px 14px 8px 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  z-index: 10;
+}
+
+.badgeAvatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #2D6A4F, #52B788);
+  flex-shrink: 0;
+}
+
+.badgeName {
+  font-size: 13px;
+  font-weight: $font-weight-semibold;
+  color: $color-text;
+  line-height: 1.2;
+  margin: 0;
+}
+
+.badgeStar {
+  font-size: 11px;
+  color: #F59F00;
+  margin: 0;
+}
+
+// ── Clouds ────────────────────────────────────────────────
+.cloud {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 50px;
+  pointer-events: none;
+
+  &::before,
+  &::after {
+    content: "";
+    position: absolute;
+    background: inherit;
+    border-radius: 50%;
+  }
+}
+
+.cloudLeft {
+  width: 80px;
+  height: 28px;
+  top: 230px;
+  left: -10px;
+
+  &::before {
+    width: 40px;
+    height: 40px;
+    top: -18px;
+    left: 12px;
+  }
+  &::after {
+    width: 28px;
+    height: 28px;
+    top: -12px;
+    left: 36px;
+  }
+}
+
+.cloudRight {
+  width: 60px;
+  height: 22px;
+  top: 100px;
+  right: 50px;
+
+  &::before {
+    width: 30px;
+    height: 30px;
+    top: -14px;
+    left: 8px;
+  }
+  &::after {
+    width: 22px;
+    height: 22px;
+    top: -10px;
+    left: 26px;
+  }
+}
+
+// ── Decorative dots ───────────────────────────────────────
+.dot {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.dotDark {
+  width: 8px;
+  height: 8px;
+  background: #1a1a2e;
+  top: 140px;
+  left: 46%;
+}
+
+.dotBlue {
+  width: 8px;
+  height: 8px;
+  background: #1971C2;
+  top: 290px;
+  left: 40px;
+}
+
+.dotGreen {
+  width: 8px;
+  height: 8px;
+  background: #2D6A4F;
+  top: 200px;
+  right: 32px;
+}
+
+// ── Content ───────────────────────────────────────────────
+.content {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 0 32px 56px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.title {
+  font-size: 38px;
+  font-weight: $font-weight-bold;
+  color: #111827;
+  line-height: 1.2;
+  margin: 0 0 14px;
+  letter-spacing: -0.5px;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: #6B7280;
+  line-height: 1.6;
+  margin: 0 0 36px;
+}
+
+.startBtn {
+  width: 100%;
+  max-width: 260px;
+  height: 52px;
+  background: #1D6FEB;
+  color: #fff;
+  font-size: 16px;
+  font-weight: $font-weight-semibold;
+  border: none;
+  border-radius: $radius-full;
+  cursor: pointer;
+  transition: background $transition-fast;
+
+  &:active {
+    background: #1558C0;
+  }
+}

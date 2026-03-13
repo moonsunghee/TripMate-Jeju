@@ -43,6 +43,25 @@ def login(body: LoginRequest, db: Session = Depends(get_db)):
     return TokenResponse(access_token=token)
 
 
+@router.post("/demo", response_model=TokenResponse)
+def demo_login(db: Session = Depends(get_db)):
+    """데모용 계정으로 로그인 (회원가입 없이 둘러보기)"""
+    DEMO_EMAIL = "demo@tripmate.kr"
+    user = db.query(User).filter(User.email == DEMO_EMAIL).first()
+    if not user:
+        user = User(
+            email=DEMO_EMAIL,
+            password=hash_password("demo1234!"),
+            nickname="데모유저",
+        )
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+
+    token = create_access_token({"sub": str(user.id), "email": user.email})
+    return TokenResponse(access_token=token)
+
+
 @router.get("/me", response_model=UserResponse)
 def me(current_user: User = Depends(get_current_user)):
     return current_user
