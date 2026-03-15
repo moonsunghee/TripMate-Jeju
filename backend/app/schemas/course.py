@@ -134,7 +134,16 @@ class GeneratedPlaceItem(BaseModel):
     memo: Optional[str] = None
 
 
+class EnrichedPlaceItem(GeneratedPlaceItem):
+    """AI 생성 장소 + 카카오/TourAPI에서 보강된 실제 업체 정보"""
+    address: Optional[str] = None
+    phone_number: Optional[str] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
+    kakao_url: Optional[str] = None
+
+
 class CourseGenerateResponse(BaseModel):
     title: str
     description: str
-    places: List[GeneratedPlaceItem]
+    places: List[EnrichedPlaceItem]

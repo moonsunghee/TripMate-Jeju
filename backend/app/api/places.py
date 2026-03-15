@@ -1,6 +1,7 @@
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
@@ -8,6 +9,17 @@ from app.db.session import get_db
 from app.models.place import Place
 from app.models.user import User
 from app.schemas.place import PlaceCreate, PlaceResponse, PlaceUpdate
+from app.services.kakao_local import search_place
+
+
+class KakaoPlaceResult(BaseModel):
+    place_name: Optional[str] = None
+    address: Optional[str] = None
+    phone_number: Optional[str] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
+    kakao_url: Optional[str] = None
+
 
 router = APIRouter()
 
@@ -80,3 +92,21 @@ def delete_place(
         raise HTTPException(status_code=404, detail="장소를 찾을 수 없습니다.")
     db.delete(place)
     db.commit()
+
+
+# ── 카카오 로컬 API 장소 검색 ────────────────────────────────────────────────────
+
+@router.get("/kakao/search", response_model=KakaoPlaceResult)
+async def kakao_search(
+    q: str = Query(..., description="검색할 장소명"),
+    category: str = Query("tourist", description="restaurant | dessert | tourist | accommodation | nightfood"),
+    region: Optional[str] = Query(None, description="제주 지역명 (예: 서귀포시)"),
+):
+    """
+    카카오 로컬 API로 장소 실시간 검색.
+    프론트에서 장소 상세 정보(주소, 전화번호, 좌표)가 필요할 때 사용.
+    """
+    result = await search_place(q, category, region)
+    if not result:
+        raise HTTPException(status_code=404, detail="장소를 찾을 수 없습니다.")
+    return result

@@ -63,9 +63,10 @@ def my_courses(
 @router.post("/generate", response_model=CourseGenerateResponse)
 async def ai_generate_course(
     body: CourseGenerateRequest,
+    db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    result = await generate_course(body)
+    result = await generate_course(body, db=db)
     return result
 
 

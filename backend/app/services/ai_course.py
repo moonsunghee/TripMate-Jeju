@@ -6,9 +6,12 @@ OPENAI_API_KEY 환경변수가 없으면 더미 데이터를 반환합니다.
 import json
 import os
 from datetime import date
-from typing import List
+from typing import List, Optional
+
+from sqlalchemy.orm import Session
 
 from app.schemas.course import CourseGenerateRequest, GeneratedPlaceItem
+from app.services.place_enricher import enrich_places_bulk
 
 
 # ── 카테고리별 시간 매핑 ──────────────────────────────────────────────────────────
@@ -82,16 +85,28 @@ def _build_prompt(req: CourseGenerateRequest) -> str:
 """.strip()
 
 
-async def generate_course(req: CourseGenerateRequest) -> dict:
+async def generate_course(
+    req: CourseGenerateRequest,
+    db: Optional[Session] = None,
+) -> dict:
     """
     OpenAI가 있으면 실제 AI 생성, 없으면 더미 반환.
+    db가 전달되면 장소 정보를 카카오/TourAPI로 enrichment.
     """
     api_key = os.getenv("OPENAI_API_KEY")
 
     if api_key:
-        return await _generate_with_openai(req, api_key)
+        result = await _generate_with_openai(req, api_key)
     else:
-        return _generate_dummy(req)
+        result = _generate_dummy(req)
+
+    # 장소 정보 enrichment (주소, 전화번호, 좌표 보강)
+    if db is not None:
+        result["places"] = await enrich_places_bulk(
+            result["places"], req.region, db
+        )
+
+    return result
 
 
 async def _generate_with_openai(req: CourseGenerateRequest, api_key: str) -> dict:
