@@ -46,8 +46,13 @@ export default function HomePage() {
         api.get<Course[]>("/api/courses/my").then(setMyCourses).catch(() => {});
       })
       .catch(() => {
-        authStorage.clear();
-        router.push("/intro");
+        const mockUser = authStorage.getMockUser();
+        if (mockUser) {
+          setUser(mockUser);
+        } else {
+          authStorage.clear();
+          router.push("/intro");
+        }
       });
 
     // 공개 공유 코스

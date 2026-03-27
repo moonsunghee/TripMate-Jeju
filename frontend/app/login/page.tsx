@@ -26,12 +26,21 @@ function LoginForm() {
     try {
       const data = await api.post<TokenResponse>("/api/auth/demo", {});
       authStorage.setToken(data.access_token);
-      const next = searchParams.get("next") ?? "/";
-      router.push(next);
     } catch {
-      setError("데모 로그인에 실패했습니다. 백엔드 서버를 확인해주세요.");
+      // 백엔드 미연결 시 프론트에서 게스트 세션 생성
+      authStorage.setToken("guest-demo-token");
+      authStorage.setMockUser({
+        id: 0,
+        email: "guest@tripmate.jeju",
+        nickname: "게스트",
+        profile_image: null,
+        bio: null,
+        created_at: new Date().toISOString(),
+      });
     } finally {
       setLoading(false);
+      const next = searchParams.get("next") ?? "/";
+      router.push(next);
     }
   };
 
