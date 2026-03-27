@@ -44,24 +44,12 @@
 
 .cta {
   .iconWrap {
-    background-color: $color-primary;
-    color: #ffffff;
-    width: 44px;
-    height: 44px;
-    border-radius: $radius-full;
-    @include flex-center;
-    margin-top: -20px;
-    box-shadow: $shadow-md;
-    transition: background-color $transition-fast, transform $transition-fast;
+    width: 28px;
+    height: 28px;
   }
 
   .label {
-    color: $color-primary;
     font-weight: $font-weight-semibold;
-  }
-
-  &:active .iconWrap {
-    transform: scale(0.95);
   }
 }
 

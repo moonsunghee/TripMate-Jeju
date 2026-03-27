@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { api, ApiError } from "@/lib/api";
 import type { GeneratedCourse, Course } from "@/lib/types";
 import {
-  RiArrowLeftLine, RiCheckLine,
+  RiCheckLine,
   RiSunLine, RiCompass3Line, RiAnchorLine, RiRunLine, RiWalkLine,
   RiHeartPulseLine, RiFlag2Line, RiDropLine, RiBikeLine,
   RiUserSmileLine, RiGroupLine,
@@ -14,6 +14,7 @@ import {
 } from "react-icons/ri";
 import type { IconType } from "react-icons";
 import JejuMap from "@/components/ui/JejuMap";
+import BottomNav from "@/components/layout/BottomNav";
 import styles from "./page.module.scss";
 
 // ============================================================
@@ -201,10 +202,6 @@ const MOCK_COURSES = [
   },
 ];
 
-const SCREEN_TITLES = [
-  "여행목적", "여행일", "교통수단", "여행희망지역",
-  "AI코스 설계 중", "코스 선택", "추천코스상세", "코스 저장",
-];
 
 const INITIAL_FORM: DesignFormData = {
   purposes: [], durationDays: null, startMeal: "조식", endMeal: "석식",
@@ -225,7 +222,7 @@ type StepProps = {
 // ============================================================
 export default function DesignPage() {
   const router = useRouter();
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(0);
   const [form, setForm] = useState<DesignFormData>(INITIAL_FORM);
   const [generatedCourse, setGeneratedCourse] = useState<GeneratedCourse | null>(null);
   const [saving, setSaving] = useState(false);
@@ -260,7 +257,7 @@ export default function DesignPage() {
   }, [step, form]);
 
   const handleBack = () => {
-    if (step === 1) router.back();
+    if (step === 1) setStep(0);
     else {
       if (step === 6) generateCalled.current = false; // 재생성 허용
       setStep((s) => s - 1);
@@ -348,16 +345,12 @@ export default function DesignPage() {
   const isLoading = step === 5;
   const isSave = step === 8;
 
+  if (step === 0) {
+    return <IntroPage onStart={() => setStep(1)} />;
+  }
+
   return (
     <div className={styles.page}>
-      <div className={styles.header}>
-        <button className={styles.backBtn} onClick={handleBack}>
-          <RiArrowLeftLine size={20} />
-        </button>
-        <span className={styles.headerTitle}>{SCREEN_TITLES[step - 1]}</span>
-        <div className={styles.headerSpacer} />
-      </div>
-
       <div className={styles.content}>
         {step === 1 && <PurposeStep form={form} setForm={setForm} />}
         {step === 2 && <DurationStep form={form} setForm={setForm} />}
@@ -396,6 +389,58 @@ export default function DesignPage() {
           )}
         </div>
       )}
+    </div>
+  );
+}
+
+// ============================================================
+// IntroPage (Step 0)
+// ============================================================
+function IntroPage({ onStart }: { onStart: () => void }) {
+  return (
+    <div className={styles.introPage}>
+      <div className={styles.introHero}>
+        <div className={styles.introIconWrap}>
+          <RiRouteLine size={48} color="#fff" />
+        </div>
+        <h1 className={styles.introTitle}>AI 코스 설계</h1>
+        <p className={styles.introSubtitle}>
+          나만의 제주 여행 코스를<br />AI가 맞춤 설계해 드려요
+        </p>
+      </div>
+
+      <div className={styles.introSteps}>
+        <div className={styles.introStep}>
+          <div className={styles.introStepNum}>1</div>
+          <div className={styles.introStepText}>
+            <strong>여행 조건 입력</strong>
+            <span>목적, 기간, 이동수단, 희망 지역을 선택하세요</span>
+          </div>
+        </div>
+        <div className={styles.introStepLine} />
+        <div className={styles.introStep}>
+          <div className={styles.introStepNum}>2</div>
+          <div className={styles.introStepText}>
+            <strong>AI 코스 추천</strong>
+            <span>조건에 최적화된 코스를 자동으로 생성해요</span>
+          </div>
+        </div>
+        <div className={styles.introStepLine} />
+        <div className={styles.introStep}>
+          <div className={styles.introStepNum}>3</div>
+          <div className={styles.introStepText}>
+            <strong>저장 & 공유</strong>
+            <span>마음에 드는 코스를 저장하고 동행을 모집해요</span>
+          </div>
+        </div>
+      </div>
+
+      <div className={styles.introBottom}>
+        <button className={styles.introStartBtn} onClick={onStart}>
+          코스 설계 시작하기
+        </button>
+      </div>
+      <BottomNav />
     </div>
   );
 }

@@ -1,47 +1,41 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
-import {
-  RiHome2Line, RiHome2Fill,
-  RiNewspaperLine, RiNewspaperFill,
-  RiCompass3Line, RiCompass3Fill,
-  RiMapLine, RiMapFill,
-  RiMessage2Line, RiMessage2Fill,
-} from "react-icons/ri";
 import styles from "./BottomNav.module.scss";
 
 const NAV_ITEMS = [
   {
     href: "/",
-    label: "홈",
-    icon: RiHome2Line,
-    activeIcon: RiHome2Fill,
-  },
-  {
-    href: "/board",
-    label: "코스게시판",
-    icon: RiNewspaperLine,
-    activeIcon: RiNewspaperFill,
-  },
-  {
-    href: "/design",
-    label: "코스설계",
-    icon: RiCompass3Line,
-    activeIcon: RiCompass3Fill,
-    isCta: true,
+    label: "메인",
+    icon: "/nav_home.svg",
+    activeIcon: "/nav_home_active.svg",
   },
   {
     href: "/my-courses",
     label: "내코스",
-    icon: RiMapLine,
-    activeIcon: RiMapFill,
+    icon: "/nav_mycourse.svg",
+    activeIcon: "/nav_mycourse_active.svg",
+  },
+  {
+    href: "/design",
+    label: "코스설계",
+    icon: "/nav_makecourse.svg",
+    activeIcon: "/nav_makecourse_active.svg",
+    isCta: true,
+  },
+  {
+    href: "/board",
+    label: "동행모집",
+    icon: "/nav_companion.svg",
+    activeIcon: "/nav_companion_active.svg",
   },
   {
     href: "/chat",
     label: "채팅",
-    icon: RiMessage2Line,
-    activeIcon: RiMessage2Fill,
+    icon: "/nav_chat.svg",
+    activeIcon: "/nav_chat_active.svg",
   },
 ];
 
@@ -52,7 +46,6 @@ export default function BottomNav() {
     <nav className={styles.nav}>
       {NAV_ITEMS.map((item) => {
         const isActive = pathname === item.href;
-        const Icon = isActive ? item.activeIcon : item.icon;
 
         return (
           <Link
@@ -61,7 +54,12 @@ export default function BottomNav() {
             className={`${styles.item} ${isActive ? styles.active : ""} ${item.isCta ? styles.cta : ""}`}
           >
             <span className={styles.iconWrap}>
-              <Icon size={24} />
+              <Image
+                src={isActive ? item.activeIcon : item.icon}
+                alt={item.label}
+                width={24}
+                height={24}
+              />
             </span>
             <span className={styles.label}>{item.label}</span>
           </Link>
