@@ -9,6 +9,7 @@ python-jose[cryptography]>=3.3.0
 python-dotenv>=1.0.0
 python-multipart>=0.0.9
 httpx
+psycopg2-binary>=2.9.0
 
 # AI Agent
 langchain
