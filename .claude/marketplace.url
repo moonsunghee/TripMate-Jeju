@@ -1,0 +1,17 @@
+# TripMate-Jeju DevKit — 배포 정보
+
+## 현재 상태
+로컬 프로젝트 전용 플러그인 (마켓플레이스 미등록)
+
+## 팀 설치 방법
+이 저장소를 클론하면 `.claude/` 디렉토리가 포함됩니다.
+Claude Code에서 프로젝트를 열면 자동으로 모든 레이어가 활성화됩니다.
+
+## 포함된 능력 (plugin.json 참조)
+- Skills: /dev, /check, /deploy
+- Agents: code-reviewer, api-tester, ux-checker, explorer, feature-dev
+- Hooks: pre-tool-use, post-tool-use, session-start, stop, subagent-stop
+- Commands: /review, /status, /explore
+
+## 마켓플레이스 등록 시
+https://github.com/anthropics/claude-code-marketplace 참조

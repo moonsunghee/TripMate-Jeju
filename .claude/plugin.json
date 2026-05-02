@@ -1,0 +1,29 @@
+{
+  "name": "tripmate-jeju-devkit",
+  "version": "1.0.0",
+  "description": "TripMate-Jeju 프로젝트용 Agent Dev Kit — 개발, 검사, 배포, 리뷰 자동화",
+  "skills": [
+    "skills/dev",
+    "skills/check",
+    "skills/deploy"
+  ],
+  "agents": [
+    "agents/code-reviewer",
+    "agents/api-tester",
+    "agents/ux-checker",
+    "agents/explorer",
+    "agents/feature-dev"
+  ],
+  "hooks": [
+    "hooks/pre-tool-use.sh",
+    "hooks/post-tool-use.sh",
+    "hooks/session-start.sh",
+    "hooks/stop.sh",
+    "hooks/subagent-stop.sh"
+  ],
+  "commands": [
+    "commands/review",
+    "commands/status",
+    "commands/explore"
+  ]
+}
