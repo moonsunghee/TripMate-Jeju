@@ -36,3 +36,11 @@ mobile/.dart_tool/
 mobile/build/
 mobile/.flutter-plugins
 mobile/.flutter-plugins-dependencies
+
+# 디자인 원본 (용량 큼, Figma 링크로 공유)
+design/
+reference/
+
+# 로그 / 스크래치 파일
+.claude/logs/
+TripMate-Jeju-files.txt
