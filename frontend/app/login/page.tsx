@@ -20,30 +20,6 @@ function LoginForm() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleDemoLogin = async () => {
-    setLoading(true);
-    setError("");
-    try {
-      const data = await api.post<TokenResponse>("/api/auth/demo", {});
-      authStorage.setToken(data.access_token);
-    } catch {
-      // 백엔드 미연결 시 프론트에서 게스트 세션 생성
-      authStorage.setToken("guest-demo-token");
-      authStorage.setMockUser({
-        id: 0,
-        email: "guest@tripmate.jeju",
-        nickname: "게스트",
-        profile_image: null,
-        bio: null,
-        created_at: new Date().toISOString(),
-      });
-    } finally {
-      setLoading(false);
-      const next = searchParams.get("next") ?? "/";
-      router.push(next);
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) return;
@@ -101,14 +77,6 @@ function LoginForm() {
           {loading ? "로그인 중..." : "로그인"}
         </button>
       </form>
-
-      {/* 데모 로그인 */}
-      <div className={styles.dividerWrap}>
-        <span className={styles.divider}>또는</span>
-      </div>
-      <button type="button" className={styles.demoBtn} onClick={handleDemoLogin}>
-        🧭 회원가입 없이 둘러보기
-      </button>
 
       {/* 소셜 로그인 */}
       <div className={styles.dividerWrap}>

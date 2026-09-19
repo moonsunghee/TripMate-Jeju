@@ -112,3 +112,16 @@
   color: #DC3545;
   margin: 0;
 }
+
+.loginLink {
+  text-align: center;
+  margin: 0 $spacing-6 $spacing-8;
+  font-size: $font-size-sm;
+  color: $color-text-muted;
+}
+
+.loginAnchor {
+  color: $color-primary;
+  font-weight: $font-weight-semibold;
+  text-decoration: underline;
+}

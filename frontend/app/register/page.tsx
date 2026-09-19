@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { RiArrowLeftLine } from "react-icons/ri";
 import Input from "@/components/ui/Input";
@@ -34,7 +35,7 @@ export default function RegisterPage() {
     const newErrors: Partial<typeof form> = {};
     if (!form.email) newErrors.email = "이메일을 입력해주세요";
     if (!form.password) newErrors.password = "비밀번호를 입력해주세요";
-    if (form.password.length < 8) newErrors.password = "비밀번호는 8자 이상이어야 합니다";
+    if (form.password.length < 6) newErrors.password = "비밀번호는 6자 이상이어야 합니다";
     if (form.password !== form.passwordConfirm) newErrors.passwordConfirm = "비밀번호가 일치하지 않습니다";
     if (!form.nickname) newErrors.nickname = "닉네임을 입력해주세요";
     if (!form.birthday) newErrors.birthday = "생년월일을 입력해주세요";
@@ -93,7 +94,7 @@ export default function RegisterPage() {
           label="비밀번호 *"
           type="password"
           name="password"
-          placeholder="8자 이상 입력하세요"
+          placeholder="6자 이상 입력하세요"
           value={form.password}
           onChange={handleChange}
           error={errors.password}
@@ -143,6 +144,13 @@ export default function RegisterPage() {
           {loading ? "처리 중..." : "가입하기"}
         </button>
       </form>
+
+      <p className={styles.loginLink}>
+        이미 계정이 있으신가요?{" "}
+        <Link href="/login" className={styles.loginAnchor}>
+          로그인
+        </Link>
+      </p>
     </div>
   );
 }
