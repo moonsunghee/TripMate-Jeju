@@ -7,11 +7,14 @@ import {
   RiHeartLine, RiTimeLine, RiCarLine, RiGroupLine,
   RiRestaurantLine, RiCupLine, RiHome2Line, RiWalkLine,
   RiAnchorLine, RiRunLine, RiFlag2Line, RiEditLine, RiShareLine,
+  RiImageLine, RiCheckboxBlankCircleLine,
 } from "react-icons/ri";
 import type { IconType } from "react-icons";
 import { api } from "@/lib/api";
-import type { Course, CoursePlace } from "@/lib/types";
+import type { Course, CoursePlace, Place } from "@/lib/types";
 import KakaoMap from "@/components/KakaoMap";
+import PlaceDetailSheet, { type PlaceDetailData } from "@/components/ui/PlaceDetailSheet";
+import PlaceEditSheet from "@/components/ui/PlaceEditSheet";
 import styles from "./page.module.scss";
 
 const CATEGORY_ICONS: Record<string, IconType> = {
@@ -25,6 +28,8 @@ const CATEGORY_ICONS: Record<string, IconType> = {
   러닝: RiRunLine, 트레일: RiRunLine,
   골프: RiFlag2Line,
 };
+
+const PLACE_OPTIONS = ["주차", "포장", "예약", "24시간", "반려동반", "화장실"];
 
 const STATUS_LABEL: Record<string, string> = {
   draft: "임시저장", master: "Master", sharing: "공유중",
@@ -48,6 +53,71 @@ export default function MyCourseDetailPage() {
   const [course, setCourse] = useState<Course | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeDay, setActiveDay] = useState(1);
+  const [selectedPlace, setSelectedPlace] = useState<PlaceDetailData | null>(null);
+  const [selectedPlaceId, setSelectedPlaceId] = useState<number | null>(null);
+  const [sheetMode, setSheetMode] = useState<"view" | "edit">("view");
+
+  const openPlaceDetail = (item: CoursePlace) => {
+    setSelectedPlaceId(item.id);
+    setSheetMode("view");
+    setSelectedPlace({
+      category: item.category,
+      time: item.time,
+      placeName: item.place_name ?? "-",
+      memo: item.memo,
+      image: item.place_image,
+      options: PLACE_OPTIONS,
+    });
+    if (item.place_id) {
+      api.get<Place>(`/api/places/${item.place_id}`)
+        .then((place) => setSelectedPlace((prev) => prev && ({
+          ...prev,
+          address: place.address,
+          phone: place.phone_number,
+          description: place.description,
+          image: prev.image ?? place.place_image,
+        })))
+        .catch(() => {});
+    }
+  };
+
+  const closeSheets = () => {
+    setSelectedPlace(null);
+    setSelectedPlaceId(null);
+    setSheetMode("view");
+  };
+
+  const toPlacePayload = (p: CoursePlace) => ({
+    place_id: p.place_id,
+    visit_order: p.visit_order,
+    day: p.day,
+    place_name: p.place_name,
+    category: p.category,
+    time: p.time,
+    memo: p.memo,
+  });
+
+  const handleDeletePlace = async () => {
+    if (!course || selectedPlaceId == null) return;
+    const places = course.course_places
+      .filter((p) => p.id !== selectedPlaceId)
+      .map(toPlacePayload);
+    const updated = await api.put<Course>(`/api/courses/${course.id}`, { places });
+    setCourse(updated);
+    closeSheets();
+  };
+
+  const handleSelectPlace = async (place: Place) => {
+    if (!course || selectedPlaceId == null) return;
+    const places = course.course_places.map((p) =>
+      p.id === selectedPlaceId
+        ? { ...toPlacePayload(p), place_id: place.id, place_name: place.place_name, category: place.category }
+        : toPlacePayload(p)
+    );
+    const updated = await api.put<Course>(`/api/courses/${course.id}`, { places });
+    setCourse(updated);
+    closeSheets();
+  };
 
   useEffect(() => {
     api.get<Course>(`/api/courses/${id}/detail`)
@@ -180,7 +250,7 @@ export default function MyCourseDetailPage() {
                 </div>
 
                 <div className={styles.scheduleRight}>
-                  <div className={styles.scheduleCard}>
+                  <div className={styles.scheduleCard} onClick={() => openPlaceDetail(item)}>
                     <div className={styles.scheduleCardTop}>
                       <div className={styles.scheduleCardCategory}>
                         <Icon size={17} />
@@ -191,22 +261,41 @@ export default function MyCourseDetailPage() {
                         <span>{item.time ?? "-"}</span>
                       </div>
                     </div>
-                    <div className={styles.scheduleCardAddrRow}>
-                      <span className={styles.scheduleCardAddr}>{item.place_name ?? "-"}</span>
-                      <button
-                        className={styles.copyBtn}
-                        onClick={() => navigator.clipboard?.writeText(item.place_name ?? "")}
-                      >복사</button>
-                    </div>
-                    {item.memo && (
-                      <div className={styles.scheduleCardAddrRow}>
-                        <span className={styles.scheduleCardAddr}>{item.memo}</span>
-                        <button
-                          className={styles.copyBtn}
-                          onClick={() => navigator.clipboard?.writeText(item.memo ?? "")}
-                        >복사</button>
+                    <div className={styles.scheduleCardMain}>
+                      <div className={styles.scheduleCardThumb}>
+                        {item.place_image ? (
+                          <img src={item.place_image} alt={item.place_name ?? ""} className={styles.scheduleCardThumbImg} />
+                        ) : (
+                          <RiImageLine size={22} className={styles.scheduleCardThumbIcon} />
+                        )}
                       </div>
-                    )}
+                      <div className={styles.scheduleCardBody}>
+                        <div className={styles.scheduleCardAddrRow}>
+                          <span className={styles.scheduleCardAddr}>{item.place_name ?? "-"}</span>
+                          <button
+                            className={styles.copyBtn}
+                            onClick={(e) => { e.stopPropagation(); navigator.clipboard?.writeText(item.place_name ?? ""); }}
+                          >복사</button>
+                        </div>
+                        {item.memo && (
+                          <div className={styles.scheduleCardAddrRow}>
+                            <span className={styles.scheduleCardAddr}>{item.memo}</span>
+                            <button
+                              className={styles.copyBtn}
+                              onClick={(e) => { e.stopPropagation(); navigator.clipboard?.writeText(item.memo ?? ""); }}
+                            >복사</button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <div className={styles.scheduleCardOptions}>
+                      {PLACE_OPTIONS.map((option) => (
+                        <div key={option} className={styles.optionItem}>
+                          <RiCheckboxBlankCircleLine size={14} />
+                          <span>{option}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
 
                   {i < currentDay.length - 1 && (
@@ -241,6 +330,18 @@ export default function MyCourseDetailPage() {
           {course.status === "draft" ? "공유하기" : "공유 관리"}
         </button>
       </div>
+
+      {sheetMode === "view" && (
+        <PlaceDetailSheet data={selectedPlace} onClose={closeSheets} onEdit={() => setSheetMode("edit")} />
+      )}
+      {sheetMode === "edit" && (
+        <PlaceEditSheet
+          data={selectedPlace}
+          onClose={() => setSheetMode("view")}
+          onDelete={handleDeletePlace}
+          onSelectPlace={handleSelectPlace}
+        />
+      )}
     </div>
   );
 }

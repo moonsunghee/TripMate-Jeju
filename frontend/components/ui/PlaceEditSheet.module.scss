@@ -1,0 +1,266 @@
+@import "../../styles/variables";
+@import "../../styles/mixins";
+
+.sheet {
+  position: fixed;
+  inset: 0;
+  z-index: $z-index-modal;
+  background: $color-background;
+  @include flex-column;
+}
+
+.header {
+  @include flex-between;
+  padding: $spacing-4;
+  border-bottom: 1px solid $color-border-light;
+  flex-shrink: 0;
+}
+
+.backBtn {
+  @include button-reset;
+  @include flex-center;
+  width: 36px;
+  height: 36px;
+  color: $color-text;
+  border-radius: $radius-full;
+
+  &:hover {
+    background-color: $color-background-gray;
+  }
+}
+
+.headerTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-bold;
+  color: $color-text;
+}
+
+.scroll {
+  flex: 1;
+  overflow-y: auto;
+  @include hide-scrollbar;
+  padding: $spacing-4;
+  @include flex-column;
+  gap: $spacing-3;
+}
+
+.currentPlace {
+  display: flex;
+  align-items: center;
+  gap: $spacing-3;
+  padding: $spacing-3;
+  background: $color-background-gray;
+  border-radius: $radius-md;
+}
+
+.currentThumb {
+  @include flex-center;
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: $radius-md;
+  background: #e9ecef;
+  overflow: hidden;
+}
+
+.currentThumbImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.currentThumbIcon {
+  color: $color-text-muted;
+}
+
+.currentInfo {
+  @include flex-column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.currentName {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $color-text;
+}
+
+.currentAddr {
+  font-size: $font-size-xs;
+  color: $color-text-muted;
+  @include truncate;
+}
+
+.deleteBtn {
+  @include button-reset;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  height: 46px;
+  border-radius: $radius-md;
+  border: 1.5px solid $color-error;
+  color: $color-error;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  cursor: pointer;
+}
+
+.confirmDelete {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-2;
+  padding: $spacing-3;
+  background: rgba(#DC3545, 0.06);
+  border: 1.5px solid $color-error;
+  border-radius: $radius-md;
+}
+
+.confirmDeleteText {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $color-error;
+}
+
+.confirmDeleteActions {
+  display: flex;
+  gap: $spacing-2;
+  flex-shrink: 0;
+}
+
+.confirmCancelBtn {
+  @include button-reset;
+  padding: 6px 14px;
+  background: #e9ecef;
+  border-radius: $radius-sm;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+  color: $color-text;
+  cursor: pointer;
+}
+
+.confirmDeleteBtn {
+  @include button-reset;
+  padding: 6px 14px;
+  background: $color-error;
+  border-radius: $radius-sm;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-semibold;
+  color: #fff;
+  cursor: pointer;
+}
+
+.divider {
+  height: 1px;
+  background: $color-border-light;
+  margin: $spacing-2 0;
+}
+
+.sectionLabel {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $color-text;
+}
+
+.searchBox {
+  display: flex;
+  align-items: center;
+  gap: $spacing-2;
+  padding: 0 $spacing-3;
+  height: 44px;
+  border: 1.5px solid $color-border;
+  border-radius: $radius-md;
+}
+
+.searchIcon {
+  color: $color-text-muted;
+  flex-shrink: 0;
+}
+
+.searchInput {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: $font-size-sm;
+  color: $color-text;
+  background: transparent;
+
+  &::placeholder {
+    color: $color-text-muted;
+  }
+}
+
+.candidateList {
+  @include flex-column;
+  gap: $spacing-2;
+}
+
+.emptyText {
+  text-align: center;
+  padding: $spacing-6 0;
+  font-size: $font-size-sm;
+  color: $color-text-muted;
+}
+
+.candidateItem {
+  display: flex;
+  align-items: center;
+  gap: $spacing-3;
+  padding: $spacing-2;
+  border: 1px solid $color-border-light;
+  border-radius: $radius-md;
+}
+
+.candidateThumb {
+  @include flex-center;
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: $radius-sm;
+  background: $color-background-gray;
+  overflow: hidden;
+}
+
+.candidateThumbImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.candidateThumbIcon {
+  color: $color-text-muted;
+}
+
+.candidateInfo {
+  @include flex-column;
+  flex: 1;
+  min-width: 0;
+  gap: 2px;
+}
+
+.candidateName {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $color-text;
+  @include truncate;
+}
+
+.candidateAddr {
+  font-size: $font-size-xs;
+  color: $color-text-muted;
+  @include truncate;
+}
+
+.selectBtn {
+  @include button-reset;
+  flex-shrink: 0;
+  padding: 6px 14px;
+  background: $color-primary;
+  color: #fff;
+  border-radius: $radius-sm;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-semibold;
+  cursor: pointer;
+}

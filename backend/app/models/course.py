@@ -47,3 +47,7 @@ class CoursePlace(Base):
 
     course = relationship("Course", back_populates="course_places")
     place = relationship("Place")
+
+    @property
+    def place_image(self):
+        return self.place.place_image if self.place else None

@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { api, ApiError } from "@/lib/api";
-import type { GeneratedCourse, Course } from "@/lib/types";
+import type { GeneratedCourse, Course, Place } from "@/lib/types";
 import {
   RiCheckLine,
   RiSunLine, RiCompass3Line, RiAnchorLine, RiRunLine, RiWalkLine,
@@ -11,10 +11,14 @@ import {
   RiUserSmileLine, RiGroupLine,
   RiRestaurantLine, RiCupLine, RiMapPin2Line, RiHome2Line,
   RiCarLine, RiHeartLine, RiRouteLine, RiCalendarLine, RiTimeLine,
+  RiImageLine, RiCheckboxBlankCircleLine,
 } from "react-icons/ri";
 import type { IconType } from "react-icons";
 import JejuMap from "@/components/ui/JejuMap";
+import KakaoMap from "@/components/KakaoMap";
 import BottomNav from "@/components/layout/BottomNav";
+import PlaceDetailSheet, { type PlaceDetailData } from "@/components/ui/PlaceDetailSheet";
+import PlaceEditSheet from "@/components/ui/PlaceEditSheet";
 import styles from "./page.module.scss";
 
 // ============================================================
@@ -96,6 +100,8 @@ const CATEGORY_ICONS: Record<string, IconType> = {
   관광지: RiMapPin2Line,
   숙소: RiHome2Line,
 };
+
+const PLACE_OPTIONS = ["주차", "포장", "예약", "24시간", "반려동반", "화장실"];
 
 const MOCK_COURSES = [
   {
@@ -689,8 +695,12 @@ function CourseSelectStep({ form, setForm, generatedCourse }: StepProps & { gene
 // ============================================================
 // Step 7: 코스 상세 확인
 // ============================================================
+type ScheduleItem = { category: string; place: string; duration: string; address: string; image?: string };
+
 function CourseDetailStep({ form, generatedCourse }: { form: DesignFormData; generatedCourse: GeneratedCourse | null }) {
   const [activeDay, setActiveDay] = useState(1);
+  const [activeItem, setActiveItem] = useState<{ dayIndex: number; itemIndex: number } | null>(null);
+  const [sheetMode, setSheetMode] = useState<"view" | "edit">("view");
 
   // index 0 + AI 생성 코스가 있으면 AI 데이터 사용
   const useAI = form.selectedCourseIndex === 0 && generatedCourse;
@@ -716,14 +726,51 @@ function CourseDetailStep({ form, generatedCourse }: { form: DesignFormData; gen
 
   const title = useAI ? generatedCourse.title : course?.title ?? "";
   const tags = useAI ? ["AI 생성"] : (course?.tags ?? []);
-  const days = useAI ? aiDays! : (course?.days.map((d) => d.items) ?? []);
+  const initialDays = (useAI ? aiDays! : (course?.days.map((d) => d.items) ?? [])) as ScheduleItem[][];
   const allTransports = course?.days.map((d) => d.transports) ?? [];
+
+  const [editableDays, setEditableDays] = useState<ScheduleItem[][]>(initialDays);
 
   if (!useAI && !course) return null;
 
-  const currentDay = days[activeDay - 1] ?? [];
+  const currentDay = editableDays[activeDay - 1] ?? [];
   const items = currentDay;
   const transports = allTransports[activeDay - 1] ?? [];
+
+  const activePlace = activeItem ? editableDays[activeItem.dayIndex]?.[activeItem.itemIndex] ?? null : null;
+  const activeData: PlaceDetailData | null = activePlace ? {
+    category: activePlace.category,
+    time: activePlace.duration,
+    placeName: activePlace.place,
+    address: activePlace.address,
+    image: activePlace.image,
+    options: PLACE_OPTIONS,
+  } : null;
+
+  const closeSheets = () => {
+    setActiveItem(null);
+    setSheetMode("view");
+  };
+
+  const handleDeletePlace = () => {
+    if (!activeItem) return;
+    setEditableDays((prev) => prev.map((day, di) =>
+      di === activeItem.dayIndex ? day.filter((_, ii) => ii !== activeItem.itemIndex) : day
+    ));
+    closeSheets();
+  };
+
+  const handleSelectPlace = (place: Place) => {
+    if (!activeItem) return;
+    setEditableDays((prev) => prev.map((day, di) =>
+      di === activeItem.dayIndex
+        ? day.map((it, ii) => ii === activeItem.itemIndex
+          ? { ...it, place: place.place_name, address: place.address ?? "", image: place.place_image ?? undefined }
+          : it)
+        : day
+    ));
+    closeSheets();
+  };
 
   return (
     <div className={styles.detailWrap}>
@@ -737,11 +784,11 @@ function CourseDetailStep({ form, generatedCourse }: { form: DesignFormData; gen
         </div>
       </div>
 
-      {/* Map placeholder */}
-      <div className={styles.detailMap}>
-        <RiMapPin2Line size={28} className={styles.detailMapIcon} />
-        <p className={styles.detailMapText}>지도</p>
-      </div>
+      {/* Map */}
+      <KakaoMap
+        places={items.map((item) => item.place)}
+        className={styles.detailMap}
+      />
 
       {/* Stats */}
       <div className={styles.detailStats}>
@@ -752,7 +799,7 @@ function CourseDetailStep({ form, generatedCourse }: { form: DesignFormData; gen
         <div className={styles.detailStatDivider} />
         <div className={styles.detailStatItem}>
           <RiCalendarLine size={16} />
-          <span>{useAI ? `${days.length}일` : (course?.duration ?? "-")}</span>
+          <span>{useAI ? `${editableDays.length}일` : (course?.duration ?? "-")}</span>
         </div>
         <div className={styles.detailStatDivider} />
         <div className={styles.detailStatItem}>
@@ -764,7 +811,7 @@ function CourseDetailStep({ form, generatedCourse }: { form: DesignFormData; gen
       {/* Day tabs */}
       <div className={styles.dayTabsSection}>
         <div className={styles.dayTabs}>
-          {days.map((_, i) => {
+          {editableDays.map((_, i) => {
             const day = i + 1;
             return (
               <button
@@ -793,7 +840,10 @@ function CourseDetailStep({ form, generatedCourse }: { form: DesignFormData; gen
 
               {/* Right: card + transport */}
               <div className={styles.scheduleRight}>
-                <div className={styles.scheduleCard}>
+                <div
+                  className={styles.scheduleCard}
+                  onClick={() => { setActiveItem({ dayIndex: activeDay - 1, itemIndex: i }); setSheetMode("view"); }}
+                >
                   <div className={styles.scheduleCardTop}>
                     <div className={styles.scheduleCardCategory}>
                       {Icon && <Icon size={17} />}
@@ -804,23 +854,38 @@ function CourseDetailStep({ form, generatedCourse }: { form: DesignFormData; gen
                       <span>{item.duration}</span>
                     </div>
                   </div>
-                  <div className={styles.scheduleCardAddrRow}>
-                    <span className={styles.scheduleCardAddr}>{item.place}</span>
-                    <button
-                      className={styles.copyBtn}
-                      onClick={() => navigator.clipboard?.writeText(item.place)}
-                    >복사</button>
+                  <div className={styles.scheduleCardMain}>
+                    <div className={styles.scheduleCardThumb}>
+                      {item.image ? (
+                        <img src={item.image} alt={item.place} className={styles.scheduleCardThumbImg} />
+                      ) : (
+                        <RiImageLine size={22} className={styles.scheduleCardThumbIcon} />
+                      )}
+                    </div>
+                    <div className={styles.scheduleCardBody}>
+                      <div className={styles.scheduleCardAddrRow}>
+                        <span className={styles.scheduleCardAddr}>{item.place}</span>
+                        <button
+                          className={styles.copyBtn}
+                          onClick={(e) => { e.stopPropagation(); navigator.clipboard?.writeText(item.place); }}
+                        >복사</button>
+                      </div>
+                      <div className={styles.scheduleCardAddrRow}>
+                        <span className={styles.scheduleCardAddr}>{item.address}</span>
+                        <button
+                          className={styles.copyBtn}
+                          onClick={(e) => { e.stopPropagation(); navigator.clipboard?.writeText(item.address); }}
+                        >복사</button>
+                      </div>
+                    </div>
                   </div>
-                  <div className={styles.scheduleCardAddrRow}>
-                    <span className={styles.scheduleCardAddr}>{item.address}</span>
-                    <button
-                      className={styles.copyBtn}
-                      onClick={() => navigator.clipboard?.writeText(item.address)}
-                    >복사</button>
-                  </div>
-                  <div className={styles.scheduleCardActions}>
-                    <button className={styles.deleteBtn}>삭제</button>
-                    <button className={styles.editBtn}>수정</button>
+                  <div className={styles.scheduleCardOptions}>
+                    {PLACE_OPTIONS.map((option) => (
+                      <div key={option} className={styles.optionItem}>
+                        <RiCheckboxBlankCircleLine size={14} />
+                        <span>{option}</span>
+                      </div>
+                    ))}
                   </div>
                 </div>
                 {i < items.length - 1 && (
@@ -834,6 +899,18 @@ function CourseDetailStep({ form, generatedCourse }: { form: DesignFormData; gen
           );
         })}
       </div>
+
+      {sheetMode === "view" && (
+        <PlaceDetailSheet data={activeData} onClose={closeSheets} onEdit={() => setSheetMode("edit")} />
+      )}
+      {sheetMode === "edit" && (
+        <PlaceEditSheet
+          data={activeData}
+          onClose={() => setSheetMode("view")}
+          onDelete={handleDeletePlace}
+          onSelectPlace={handleSelectPlace}
+        />
+      )}
     </div>
   );
 }

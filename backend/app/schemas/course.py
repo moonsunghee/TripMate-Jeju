@@ -25,6 +25,7 @@ class CoursePlaceResponse(BaseModel):
     category: Optional[str]
     time: Optional[str]
     memo: Optional[str]
+    place_image: Optional[str] = None
 
     model_config = {"from_attributes": True}
 

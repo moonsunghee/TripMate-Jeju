@@ -5,6 +5,21 @@ export interface UserInfo {
   profile_image: string | null;
 }
 
+// ── 장소 ─────────────────────────────────────────────────────────────────────
+export interface Place {
+  id: number;
+  place_name: string;
+  category: string;
+  region: string | null;
+  address: string | null;
+  phone_number: string | null;
+  place_image: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  description: string | null;
+  created_at: string;
+}
+
 // ── 코스 ─────────────────────────────────────────────────────────────────────
 export interface CoursePlace {
   id: number;
@@ -15,6 +30,7 @@ export interface CoursePlace {
   category: string | null;
   time: string | null;
   memo: string | null;
+  place_image: string | null;
 }
 
 export interface Course {
