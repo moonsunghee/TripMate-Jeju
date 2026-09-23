@@ -17,7 +17,7 @@ app = FastAPI(title="TripMate-Jeju API", version="0.1.0")
 
 from app.core.config import settings
 
-_origins = ["http://localhost:3000", "https://tm-jeju.vercel.app"]
+_origins = ["http://localhost:3000", "http://192.168.0.5:3000", "https://tm-jeju.vercel.app"]
 if settings.FRONTEND_URL and settings.FRONTEND_URL not in _origins:
     _origins.append(settings.FRONTEND_URL)
 

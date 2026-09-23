@@ -245,6 +245,8 @@ export default function DesignPage() {
     const end = new Date(today.setDate(today.getDate() + (form.durationDays ?? 1) - 1))
       .toISOString().slice(0, 10);
 
+    const isMultiDay = (form.durationDays ?? 1) >= 2;
+
     api.post<GeneratedCourse>("/api/courses/generate", {
       travel_style: form.purposes[0] ?? "휴양",
       start_date: start,
@@ -253,19 +255,24 @@ export default function DesignPage() {
       meal_count: 3,
       tourist_count: 2,
       transport: form.transports[0] ?? "렌터카",
+      start_meal: isMultiDay ? form.startMeal : null,
+      end_meal: isMultiDay ? form.endMeal : null,
     }).then((data) => {
       setGeneratedCourse(data);
       setStep(6);
     }).catch(() => {
-      // API 실패 시에도 step 6으로 이동 (mock 사용)
+      // API 실패 시 알리고 mock 코스로 이동
+      alert("AI 코스 생성에 실패했습니다. 샘플 코스를 대신 보여드릴게요.");
       setStep(6);
     });
   }, [step, form]);
 
   const handleBack = () => {
     if (step === 1) setStep(0);
-    else {
-      if (step === 6) generateCalled.current = false; // 재생성 허용
+    else if (step === 6) {
+      generateCalled.current = false; // 재생성 허용
+      setStep(4); // step 5(로딩)는 건너뛰고 지역 선택으로 복귀
+    } else {
       setStep((s) => s - 1);
     }
   };
@@ -273,8 +280,8 @@ export default function DesignPage() {
   const handleNext = () => setStep((s) => s + 1);
 
   const canNext = (): boolean => {
-    if (step === 1) return form.purposes.length > 0;
-    if (step === 2) return form.durationDays !== null;
+    if (step === 1) return form.durationDays !== null;
+    if (step === 2) return form.purposes.length > 0;
     if (step === 3) return form.transports.length > 0;
     if (step === 4) return form.regions.length > 0;
     if (step === 6) return form.selectedCourseIndex !== null;
@@ -358,8 +365,8 @@ export default function DesignPage() {
   return (
     <div className={styles.page}>
       <div className={styles.content}>
-        {step === 1 && <PurposeStep form={form} setForm={setForm} />}
-        {step === 2 && <DurationStep form={form} setForm={setForm} />}
+        {step === 1 && <DurationStep form={form} setForm={setForm} />}
+        {step === 2 && <PurposeStep form={form} setForm={setForm} />}
         {step === 3 && <TransportStep form={form} setForm={setForm} />}
         {step === 4 && <RegionStep form={form} setForm={setForm} />}
         {step === 5 && <LoadingStep />}
@@ -405,38 +412,40 @@ export default function DesignPage() {
 function IntroPage({ onStart }: { onStart: () => void }) {
   return (
     <div className={styles.introPage}>
-      <div className={styles.introHero}>
-        <div className={styles.introIconWrap}>
-          <RiRouteLine size={48} color="#fff" />
+      <div className={styles.introScroll}>
+        <div className={styles.introHero}>
+          <div className={styles.introIconWrap}>
+            <RiRouteLine size={48} color="#fff" />
+          </div>
+          <h1 className={styles.introTitle}>AI 코스 설계</h1>
+          <p className={styles.introSubtitle}>
+            나만의 제주 여행 코스를<br />AI가 맞춤 설계해 드려요
+          </p>
         </div>
-        <h1 className={styles.introTitle}>AI 코스 설계</h1>
-        <p className={styles.introSubtitle}>
-          나만의 제주 여행 코스를<br />AI가 맞춤 설계해 드려요
-        </p>
-      </div>
 
-      <div className={styles.introSteps}>
-        <div className={styles.introStep}>
-          <div className={styles.introStepNum}>1</div>
-          <div className={styles.introStepText}>
-            <strong>여행 조건 입력</strong>
-            <span>목적, 기간, 이동수단, 희망 지역을 선택하세요</span>
+        <div className={styles.introSteps}>
+          <div className={styles.introStep}>
+            <div className={styles.introStepNum}>1</div>
+            <div className={styles.introStepText}>
+              <strong>여행 조건 입력</strong>
+              <span>목적, 기간, 이동수단, 희망 지역을 선택하세요</span>
+            </div>
           </div>
-        </div>
-        <div className={styles.introStepLine} />
-        <div className={styles.introStep}>
-          <div className={styles.introStepNum}>2</div>
-          <div className={styles.introStepText}>
-            <strong>AI 코스 추천</strong>
-            <span>조건에 최적화된 코스를 자동으로 생성해요</span>
+          <div className={styles.introStepLine} />
+          <div className={styles.introStep}>
+            <div className={styles.introStepNum}>2</div>
+            <div className={styles.introStepText}>
+              <strong>AI 코스 추천</strong>
+              <span>조건에 최적화된 코스를 자동으로 생성해요</span>
+            </div>
           </div>
-        </div>
-        <div className={styles.introStepLine} />
-        <div className={styles.introStep}>
-          <div className={styles.introStepNum}>3</div>
-          <div className={styles.introStepText}>
-            <strong>저장 & 공유</strong>
-            <span>마음에 드는 코스를 저장하고 동행을 모집해요</span>
+          <div className={styles.introStepLine} />
+          <div className={styles.introStep}>
+            <div className={styles.introStepNum}>3</div>
+            <div className={styles.introStepText}>
+              <strong>저장 & 공유</strong>
+              <span>마음에 드는 코스를 저장하고 동행을 모집해요</span>
+            </div>
           </div>
         </div>
       </div>
@@ -465,30 +474,39 @@ function StepHeader({ step, title, desc }: { step: number; title: string; desc: 
 }
 
 // ============================================================
-// Step 1: 여행 목적
+// Step 2: 여행 목적
 // ============================================================
 function PurposeStep({ form, setForm }: StepProps) {
+  const maxCount = form.durationDays ?? PURPOSES.length;
+
   const toggle = (p: TravelPurpose) =>
-    setForm((prev) => ({
-      ...prev,
-      purposes: prev.purposes.includes(p)
-        ? prev.purposes.filter((x) => x !== p)
-        : [...prev.purposes, p],
-    }));
+    setForm((prev) => {
+      if (prev.purposes.includes(p)) {
+        return { ...prev, purposes: prev.purposes.filter((x) => x !== p) };
+      }
+      if (prev.purposes.length >= maxCount) return prev;
+      return { ...prev, purposes: [...prev.purposes, p] };
+    });
 
   return (
     <div className={styles.stepContent}>
       <div className={styles.card}>
-        <StepHeader step={1} title="여행목적" desc="여행 목적을 선택해 주세요. (복수선택가능)" />
+        <StepHeader
+          step={3}
+          title="여행목적"
+          desc={`여행 목적을 선택해 주세요. (최대 ${maxCount}개)`}
+        />
         <div className={styles.purposeList}>
           {PURPOSES.map((p) => {
             const Icon = PURPOSE_ICONS[p];
             const selected = form.purposes.includes(p);
+            const disabled = !selected && form.purposes.length >= maxCount;
             return (
               <button
                 key={p}
                 className={`${styles.purposeBtn} ${selected ? styles.purposeBtnSelected : ""}`}
                 onClick={() => toggle(p)}
+                disabled={disabled}
               >
                 <Icon size={22} className={styles.purposeIcon} />
                 <span>{p}</span>
@@ -502,19 +520,23 @@ function PurposeStep({ form, setForm }: StepProps) {
 }
 
 // ============================================================
-// Step 2: 여행일수 + 시작/종료일정
+// Step 1: 여행일수 + 시작/종료일정
 // ============================================================
 function DurationStep({ form, setForm }: StepProps) {
   return (
     <div className={styles.stepContent}>
       <div className={styles.card}>
-        <StepHeader step={2} title="여행일수" desc="여행일수를 선택해 주세요. (최대 6박 7일)" />
+        <StepHeader step={1} title="여행일수" desc="여행일수를 선택해 주세요. (최대 6박 7일)" />
         <div className={styles.dayRow}>
           {[1, 2, 3, 4, 5, 6, 7].map((n) => (
             <button
               key={n}
               className={`${styles.dayBtn} ${form.durationDays === n ? styles.dayBtnSelected : ""}`}
-              onClick={() => setForm((p) => ({ ...p, durationDays: n }))}
+              onClick={() => setForm((p) => ({
+                ...p,
+                durationDays: n,
+                purposes: p.purposes.slice(0, n),
+              }))}
             >
               {n}
             </button>
@@ -522,29 +544,31 @@ function DurationStep({ form, setForm }: StepProps) {
         </div>
       </div>
 
-      <div className={styles.card}>
-        <StepHeader step={3} title="시작, 종료일정" desc="시작과 종료 일정을 선택해 주세요." />
-        <div className={styles.selectGroup}>
-          <label className={styles.selectLabel}>첫째 날 시작일정</label>
-          <select
-            className={styles.selectBox}
-            value={form.startMeal}
-            onChange={(e) => setForm((p) => ({ ...p, startMeal: e.target.value }))}
-          >
-            {MEAL_OPTIONS.map((m) => <option key={m} value={m}>{m}</option>)}
-          </select>
+      {form.durationDays !== null && form.durationDays >= 2 && (
+        <div className={styles.card}>
+          <StepHeader step={2} title="시작, 종료일정" desc="시작과 종료 일정을 선택해 주세요." />
+          <div className={styles.selectGroup}>
+            <label className={styles.selectLabel}>첫째 날 시작일정</label>
+            <select
+              className={styles.selectBox}
+              value={form.startMeal}
+              onChange={(e) => setForm((p) => ({ ...p, startMeal: e.target.value }))}
+            >
+              {MEAL_OPTIONS.map((m) => <option key={m} value={m}>{m}</option>)}
+            </select>
+          </div>
+          <div className={styles.selectGroup}>
+            <label className={styles.selectLabel}>마지막 날 종료일정</label>
+            <select
+              className={styles.selectBox}
+              value={form.endMeal}
+              onChange={(e) => setForm((p) => ({ ...p, endMeal: e.target.value }))}
+            >
+              {MEAL_OPTIONS.map((m) => <option key={m} value={m}>{m}</option>)}
+            </select>
+          </div>
         </div>
-        <div className={styles.selectGroup}>
-          <label className={styles.selectLabel}>마지막 날 종료일정</label>
-          <select
-            className={styles.selectBox}
-            value={form.endMeal}
-            onChange={(e) => setForm((p) => ({ ...p, endMeal: e.target.value }))}
-          >
-            {MEAL_OPTIONS.map((m) => <option key={m} value={m}>{m}</option>)}
-          </select>
-        </div>
-      </div>
+      )}
     </div>
   );
 }

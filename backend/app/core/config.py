@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     GOOGLE_CLIENT_ID: str = ""
     GOOGLE_CLIENT_SECRET: str = ""
     TOUR_API_KEY: str = ""             # 한국관광공사 TourAPI (data.go.kr)
+    ANTHROPIC_API_KEY: str = ""        # Claude (AI 코스 생성)
     FRONTEND_URL: str = "http://localhost:3000"
     BACKEND_URL: str = "http://localhost:8000"
 

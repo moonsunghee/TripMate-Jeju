@@ -124,6 +124,8 @@ class CourseGenerateRequest(BaseModel):
     meal_count: int = 3         # 하루 식사 횟수
     tourist_count: int = 3      # 하루 관광지 횟수
     transport: str = "렌터카"
+    start_meal: Optional[str] = None   # 첫째 날 시작일정 (예: 조식, 석식). 여행 2일 이상일 때만 의미 있음
+    end_meal: Optional[str] = None     # 마지막 날 종료일정 (예: 중식, 야식). 여행 2일 이상일 때만 의미 있음
 
 
 class GeneratedPlaceItem(BaseModel):

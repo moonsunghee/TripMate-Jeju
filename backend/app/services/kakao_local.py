@@ -22,9 +22,6 @@ CATEGORY_CODE = {
     "tourist":    "AT4",      # 관광명소
 }
 
-# 제주도 중심 좌표
-JEJU_CENTER = {"x": "126.5312", "y": "33.4996"}
-
 
 async def search_place(
     place_name: str,
@@ -44,9 +41,6 @@ async def search_place(
     params = {
         "query": query,
         "size": 1,
-        "x": JEJU_CENTER["x"],
-        "y": JEJU_CENTER["y"],
-        "radius": 50000,  # 50km (제주도 전체 커버)
     }
     if category_group_code:
         params["category_group_code"] = category_group_code
@@ -95,9 +89,6 @@ async def search_places_by_category(
         "query": f"제주 {region}",
         "category_group_code": category_code,
         "size": size,
-        "x": JEJU_CENTER["x"],
-        "y": JEJU_CENTER["y"],
-        "radius": 50000,
     }
     headers = {"Authorization": f"KakaoAK {settings.KAKAO_REST_API_KEY}"}
 

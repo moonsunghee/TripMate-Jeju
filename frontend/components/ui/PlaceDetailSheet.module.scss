@@ -4,6 +4,8 @@
 .sheet {
   position: fixed;
   inset: 0;
+  max-width: $mobile-max-width;
+  margin: 0 auto;
   z-index: $z-index-modal;
   background: $color-background;
   @include flex-column;
@@ -44,7 +46,7 @@
 .imageWrap {
   @include flex-center;
   width: 100%;
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 3 / 2;
   background: $color-background-gray;
   overflow: hidden;
 }

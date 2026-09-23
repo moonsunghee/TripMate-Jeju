@@ -24,7 +24,7 @@ Browser (mobile 430px)
 ```
 
 - 프론트-백엔드 통신은 REST API (JWT Bearer 토큰)
-- AI 코스 생성: 백엔드에서 GPT-4o-mini 호출 → `OPENAI_API_KEY` 없으면 샘플 반환
+- AI 코스 생성: 백엔드에서 Claude(claude-haiku-4-5) 호출 → `ANTHROPIC_API_KEY` 없으면 샘플 반환
 - 소셜 로그인: Kakao/Naver/Google OAuth 2.0, 키 미설정 시 501 응답
 - 실시간 채팅: WebSocket (`/ws/chat/{room_id}`)
 
@@ -150,4 +150,4 @@ TripMate-Jeju/
 - 새 패키지 설치 (`npm install`) 전 반드시 유저에게 확인
 - `components/ui/` 는 shadcn 관리 — 명시적 요청 없이 수정 금지
 - Python 명령 실행 전 반드시 venv 활성화: `source backend/.venv/bin/activate`
-- AI 코스 생성은 `backend/.env`의 `OPENAI_API_KEY` 필요
+- AI 코스 생성은 `backend/.env`의 `ANTHROPIC_API_KEY` 필요

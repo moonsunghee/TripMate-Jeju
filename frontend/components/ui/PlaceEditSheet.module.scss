@@ -4,6 +4,8 @@
 .sheet {
   position: fixed;
   inset: 0;
+  max-width: $mobile-max-width;
+  margin: 0 auto;
   z-index: $z-index-modal;
   background: $color-background;
   @include flex-column;
