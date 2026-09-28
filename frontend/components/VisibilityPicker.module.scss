@@ -1,0 +1,64 @@
+@import "../styles/variables";
+@import "../styles/mixins";
+
+$selected-orange: #ff9900;
+
+.group {
+  @include flex-column;
+  gap: 8px;
+}
+
+.visibilityCard {
+  @include button-reset;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 14px 16px;
+  border: 1.5px solid $color-border;
+  border-radius: $radius-lg;
+  background: $color-background;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color $transition-fast, background $transition-fast;
+
+  &.visibilityCardSelected {
+    border-color: $selected-orange;
+    background: rgba($selected-orange, 0.06);
+  }
+}
+
+.visibilityDot {
+  position: relative;
+  width: 20px;
+  height: 20px;
+  border-radius: $radius-full;
+  border: 2px solid $color-border;
+  flex-shrink: 0;
+  transition: border-color $transition-fast;
+
+  .visibilityCardSelected & {
+    border-color: $selected-orange;
+
+    &::after {
+      content: "";
+      position: absolute;
+      inset: 3px;
+      border-radius: $radius-full;
+      background: $selected-orange;
+    }
+  }
+}
+
+.visibilityInfo { @include flex-column; gap: 3px; }
+
+.visibilityLabel {
+  font-size: $font-size-base;
+  font-weight: $font-weight-medium;
+  color: $color-text;
+}
+
+.visibilityHint {
+  font-size: $font-size-xs;
+  color: $color-text-muted;
+}

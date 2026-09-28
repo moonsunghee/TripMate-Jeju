@@ -1,3 +1,4 @@
+from datetime import date
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
@@ -35,11 +36,19 @@ def get_companion_course(post_id: int, db: Session = Depends(get_db)):
     return course
 
 
+def _validate_schedule(start: Optional[date], end: Optional[date], deadline: Optional[date]) -> None:
+    if start and end and end < start:
+        raise HTTPException(status_code=400, detail="여행 종료일은 출발일 이후여야 합니다.")
+    if start and deadline and deadline > start:
+        raise HTTPException(status_code=400, detail="모집 마감일은 출발일 이전이어야 합니다.")
+
+
 def _with_people(post: CompanionPost) -> dict:
     data = {c.name: getattr(post, c.name) for c in post.__table__.columns}
     data["user"] = post.user
     approved = [j for j in post.joins if j.status == "approved"]
     data["current_people"] = len(approved) + 1  # 작성자 포함
+    data["like_count"] = post.like_count
     return data
 
 
@@ -48,6 +57,7 @@ def _with_people(post: CompanionPost) -> dict:
 @router.get("", response_model=List[CompanionPostListItem])
 def list_posts(
     status_filter: Optional[str] = Query(None, alias="status"),
+    course_id: Optional[int] = Query(None),
     page: int = Query(1, ge=1),
     size: int = Query(10, ge=1, le=50),
     db: Session = Depends(get_db),
@@ -55,6 +65,8 @@ def list_posts(
     q = db.query(CompanionPost)
     if status_filter:
         q = q.filter(CompanionPost.status == status_filter)
+    if course_id is not None:
+        q = q.filter(CompanionPost.course_id == course_id)
 
     posts = q.order_by(CompanionPost.created_at.desc()).offset((page - 1) * size).limit(size).all()
 
@@ -75,16 +87,20 @@ def create_post(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    post = CompanionPost(
-        course_id=body.course_id,
-        user_id=current_user.id,
-        title=body.title,
-        content=body.content,
-        max_people=body.max_people,
-        start_date=body.start_date,
-        end_date=body.end_date,
-    )
+    course = db.query(Course).filter(Course.id == body.course_id).first()
+    if not course:
+        raise HTTPException(status_code=404, detail="코스를 찾을 수 없습니다.")
+    if course.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="본인 코스만 동행을 모집할 수 있습니다.")
+    if db.query(CompanionPost).filter(CompanionPost.course_id == course.id).first():
+        raise HTTPException(status_code=400, detail="이미 동행 모집 중인 코스입니다.")
+    _validate_schedule(body.start_date, body.end_date, body.recruit_deadline)
+
+    post = CompanionPost(user_id=current_user.id, **body.model_dump())
     db.add(post)
+    course.is_shared = True
+    course.is_recruiting = True
+    course.status = "recruiting"
     db.commit()
     db.refresh(post)
 
@@ -121,8 +137,16 @@ def update_post(
     if post.user_id != current_user.id:
         raise HTTPException(status_code=403, detail="수정 권한이 없습니다.")
 
-    for field, value in body.model_dump(exclude_unset=True).items():
+    changes = body.model_dump(exclude_unset=True)
+    _validate_schedule(
+        changes.get("start_date", post.start_date),
+        changes.get("end_date", post.end_date),
+        changes.get("recruit_deadline", post.recruit_deadline),
+    )
+    for field, value in changes.items():
         setattr(post, field, value)
+    if "status" in changes and post.course:
+        post.course.status = "completed" if post.status == "completed" else "recruiting"
 
     db.commit()
     db.refresh(post)
@@ -162,6 +186,8 @@ def join_post(
         raise HTTPException(status_code=404, detail="게시글을 찾을 수 없습니다.")
     if post.status != "recruiting":
         raise HTTPException(status_code=400, detail="모집이 마감된 게시글입니다.")
+    if post.recruit_deadline and post.recruit_deadline < date.today():
+        raise HTTPException(status_code=400, detail="모집 기간이 지난 게시글입니다.")
     if post.user_id == current_user.id:
         raise HTTPException(status_code=400, detail="본인 게시글에는 신청할 수 없습니다.")
 

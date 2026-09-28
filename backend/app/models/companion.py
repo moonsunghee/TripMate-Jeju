@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Date, DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy import JSON, Column, Date, DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
@@ -18,6 +18,11 @@ class CompanionPost(Base):
     status = Column(String, default="recruiting")
     start_date = Column(Date, nullable=True)
     end_date = Column(Date, nullable=True)
+    recruit_deadline = Column(Date, nullable=True)
+    # any / male / female
+    gender = Column(String, default="any", server_default="any")
+    # ["20s", "30s", "40s", "50s+"] — 비어 있으면 연령 무관
+    age_groups = Column(JSON, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
@@ -25,7 +30,11 @@ class CompanionPost(Base):
     user = relationship("User")
     joins = relationship("CompanionJoin", back_populates="post", cascade="all, delete-orphan")
     comments = relationship("Comment", back_populates="post", cascade="all, delete-orphan")
-    chat_room = relationship("ChatRoom", back_populates="post", uselist=False)
+    chat_room = relationship("ChatRoom", back_populates="post", uselist=False, cascade="all, delete-orphan")
+
+    @property
+    def like_count(self):
+        return self.course.like_count if self.course else 0
 
 
 class CompanionJoin(Base):

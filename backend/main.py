@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import inspect, text
 
 from app.api import auth, chat, comments, companion, courses, oauth, places
 from app.db.session import Base, engine
@@ -12,6 +13,24 @@ from app.models import user as _user_model            # noqa: F401
 
 # DB 테이블 자동 생성 (개발용)
 Base.metadata.create_all(bind=engine)
+
+# create_all은 기존 테이블에 컬럼을 추가하지 않으므로 신규 컬럼만 보강
+_ADDED_COLUMNS = {
+    "companion_posts": {
+        "recruit_deadline": "DATE",
+        "gender": "VARCHAR DEFAULT 'any'",
+        "age_groups": "JSON",
+    },
+}
+with engine.begin() as _conn:
+    _inspector = inspect(_conn)
+    for _table, _columns in _ADDED_COLUMNS.items():
+        _existing = {c["name"] for c in _inspector.get_columns(_table)}
+        for _name, _ddl in _columns.items():
+            if _name not in _existing:
+                _conn.execute(text(f"ALTER TABLE {_table} ADD COLUMN {_name} {_ddl}"))
+    # 임시저장(draft) 상태 폐지 — 기존 데이터는 나만보기로 통합
+    _conn.execute(text("UPDATE courses SET status = 'master' WHERE status = 'draft'"))
 
 app = FastAPI(title="TripMate-Jeju API", version="0.1.0")
 

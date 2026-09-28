@@ -16,6 +16,7 @@ import {
 import type { IconType } from "react-icons";
 import JejuMap from "@/components/ui/JejuMap";
 import KakaoMap from "@/components/KakaoMap";
+import VisibilityPicker, { type CourseVisibility } from "@/components/VisibilityPicker";
 import BottomNav from "@/components/layout/BottomNav";
 import PlaceDetailSheet, { type PlaceDetailData } from "@/components/ui/PlaceDetailSheet";
 import PlaceEditSheet from "@/components/ui/PlaceEditSheet";
@@ -47,8 +48,7 @@ interface DesignFormData {
   regions: Region[];
   selectedCourseIndex: number | null;
   courseName: string;
-  isShared: boolean;
-  isRecruiting: boolean;
+  visibility: CourseVisibility;
 }
 
 // ============================================================
@@ -212,7 +212,7 @@ const MOCK_COURSES = [
 const INITIAL_FORM: DesignFormData = {
   purposes: [], durationDays: null, startMeal: "조식", endMeal: "석식",
   transports: [], routePreference: "빠른길 우선", regions: [],
-  selectedCourseIndex: null, courseName: "", isShared: false, isRecruiting: false,
+  selectedCourseIndex: null, courseName: "", visibility: "master",
 };
 
 // ============================================================
@@ -223,6 +223,39 @@ type StepProps = {
   setForm: React.Dispatch<React.SetStateAction<DesignFormData>>;
 };
 
+type ScheduleItem = {
+  category: string;
+  place: string;
+  duration: string;
+  address: string;
+  image?: string;
+  placeId?: number;
+};
+
+function isAICourse(form: DesignFormData, generatedCourse: GeneratedCourse | null): generatedCourse is GeneratedCourse {
+  return form.selectedCourseIndex === 0 && !!generatedCourse;
+}
+
+function buildInitialDays(form: DesignFormData, generatedCourse: GeneratedCourse | null): ScheduleItem[][] {
+  if (isAICourse(form, generatedCourse)) {
+    const map = new Map<number, GeneratedCourse["places"]>();
+    for (const p of generatedCourse.places) {
+      if (!map.has(p.day)) map.set(p.day, []);
+      map.get(p.day)!.push(p);
+    }
+    return Array.from(map.keys()).sort((a, b) => a - b).map((d) =>
+      map.get(d)!.sort((a, b) => a.visit_order - b.visit_order).map((p) => ({
+        category: p.category,
+        place: p.place_name,
+        duration: p.time ?? "-",
+        address: p.memo ?? "",
+      }))
+    );
+  }
+  const course = form.selectedCourseIndex !== null ? MOCK_COURSES[form.selectedCourseIndex] : null;
+  return course?.days.map((d) => d.items) ?? [];
+}
+
 // ============================================================
 // Main Page
 // ============================================================
@@ -232,7 +265,13 @@ export default function DesignPage() {
   const [form, setForm] = useState<DesignFormData>(INITIAL_FORM);
   const [generatedCourse, setGeneratedCourse] = useState<GeneratedCourse | null>(null);
   const [saving, setSaving] = useState(false);
+  const [editedDays, setEditedDays] = useState<ScheduleItem[][] | null>(null);
   const generateCalled = useRef(false);
+
+  // 다른 코스를 고르거나 AI 코스가 새로 생성되면 이전 편집 내용은 버린다
+  useEffect(() => {
+    setEditedDays(null);
+  }, [form.selectedCourseIndex, generatedCourse]);
 
   // step 5: AI 생성 호출
   useEffect(() => {
@@ -288,64 +327,50 @@ export default function DesignPage() {
     return true;
   };
 
-  const handleSave = async (isDraft: boolean) => {
+  const handleSave = async () => {
     setSaving(true);
     try {
-      // 선택된 코스 데이터 구성
       const selected = form.selectedCourseIndex !== null ? MOCK_COURSES[form.selectedCourseIndex] : null;
-      const aiPlaces = generatedCourse?.places ?? [];
-
-      // AI 생성 코스가 있고 index 0이면 AI 데이터 사용, 아니면 mock
-      const usedPlaces = (form.selectedCourseIndex === 0 && aiPlaces.length > 0)
-        ? aiPlaces.map((p) => ({
-            place_name: p.place_name,
-            category: p.category,
-            day: p.day,
-            visit_order: p.visit_order,
-            time: p.time,
-            memo: p.memo,
-          }))
-        : (selected?.days ?? []).flatMap((day, di) =>
-            day.items.map((item, ii) => ({
-              place_name: item.place,
-              category: item.category,
-              day: di + 1,
-              visit_order: ii + 1,
-              time: null,
-              memo: item.address,
-            }))
-          );
+      const useAI = isAICourse(form, generatedCourse);
+      const days = editedDays ?? buildInitialDays(form, generatedCourse);
+      const usedPlaces = days.flatMap((day, di) =>
+        day.map((item, ii) => ({
+          place_id: item.placeId ?? null,
+          place_name: item.place,
+          category: item.category,
+          day: di + 1,
+          visit_order: ii + 1,
+          time: useAI && item.duration !== "-" ? item.duration : null,
+          memo: item.address || null,
+        }))
+      );
 
       const title = form.courseName.trim() || generatedCourse?.title || selected?.title || "제주 여행 코스";
       const today = new Date();
       const start = today.toISOString().slice(0, 10);
 
+      // 동행 모집은 모집 설정 페이지에서 확정되므로 그 전까지는 비공개로 저장
+      const startRecruiting = form.visibility === "recruiting";
       const savedCourse = await api.post<Course>("/api/courses", {
         title,
         description: generatedCourse?.description ?? selected?.summary ?? null,
-        duration_days: form.durationDays,
+        duration_days: days.length || form.durationDays,
         travel_style: form.purposes[0] ?? null,
         region: form.regions[0] ?? null,
         transport: form.transports[0] ?? null,
-        is_shared: form.isShared,
-        is_recruiting: form.isRecruiting,
-        status: isDraft ? "draft" : (form.isRecruiting ? "recruiting" : form.isShared ? "sharing" : "master"),
+        is_shared: form.visibility === "sharing",
+        is_recruiting: false,
+        status: startRecruiting ? "master" : form.visibility,
         start_date: start,
         places: usedPlaces,
       });
 
-      // 동행 모집 설정 시 companion post 자동 생성
-      if (!isDraft && form.isRecruiting && savedCourse) {
-        await api.post("/api/companion", {
-          course_id: savedCourse.id,
-          title,
-          content: generatedCourse?.description ?? null,
-          max_people: 4,
-          start_date: start,
-        }).catch(() => {});
+      if (startRecruiting) {
+        router.push(`/my-courses/${savedCourse.id}/recruit`);
+        return;
       }
 
-      alert(isDraft ? "임시저장 되었습니다." : "코스가 저장되었습니다.");
+      alert("코스가 저장되었습니다.");
       router.push("/my-courses");
     } catch (e) {
       if (e instanceof ApiError) alert(e.message);
@@ -371,7 +396,14 @@ export default function DesignPage() {
         {step === 4 && <RegionStep form={form} setForm={setForm} />}
         {step === 5 && <LoadingStep />}
         {step === 6 && <CourseSelectStep form={form} setForm={setForm} generatedCourse={generatedCourse} />}
-        {step === 7 && <CourseDetailStep form={form} generatedCourse={generatedCourse} />}
+        {step === 7 && (
+          <CourseDetailStep
+            form={form}
+            generatedCourse={generatedCourse}
+            days={editedDays ?? buildInitialDays(form, generatedCourse)}
+            onChangeDays={setEditedDays}
+          />
+        )}
         {step === 8 && <SaveStep form={form} setForm={setForm} onSave={handleSave} saving={saving} />}
       </div>
 
@@ -380,8 +412,7 @@ export default function DesignPage() {
           {isSave ? (
             <>
               <button className={styles.btnPrev} onClick={handleBack} disabled={saving}>이전</button>
-              <button className={styles.btnDraft} onClick={() => handleSave(true)} disabled={saving}>임시저장</button>
-              <button className={styles.btnNext} onClick={() => handleSave(false)} disabled={saving}>
+              <button className={styles.btnNext} onClick={handleSave} disabled={saving}>
                 {saving ? "저장 중..." : "저장"}
               </button>
             </>
@@ -719,41 +750,23 @@ function CourseSelectStep({ form, setForm, generatedCourse }: StepProps & { gene
 // ============================================================
 // Step 7: 코스 상세 확인
 // ============================================================
-type ScheduleItem = { category: string; place: string; duration: string; address: string; image?: string };
 
-function CourseDetailStep({ form, generatedCourse }: { form: DesignFormData; generatedCourse: GeneratedCourse | null }) {
+function CourseDetailStep({ form, generatedCourse, days: editableDays, onChangeDays }: {
+  form: DesignFormData;
+  generatedCourse: GeneratedCourse | null;
+  days: ScheduleItem[][];
+  onChangeDays: (days: ScheduleItem[][]) => void;
+}) {
   const [activeDay, setActiveDay] = useState(1);
   const [activeItem, setActiveItem] = useState<{ dayIndex: number; itemIndex: number } | null>(null);
   const [sheetMode, setSheetMode] = useState<"view" | "edit">("view");
 
-  // index 0 + AI 생성 코스가 있으면 AI 데이터 사용
-  const useAI = form.selectedCourseIndex === 0 && generatedCourse;
-
+  const useAI = isAICourse(form, generatedCourse);
   const course = !useAI && form.selectedCourseIndex !== null ? MOCK_COURSES[form.selectedCourseIndex] : null;
-
-  // AI 코스를 mock 형태로 변환
-  const aiDays = useAI ? (() => {
-    const map = new Map<number, typeof generatedCourse.places>();
-    for (const p of generatedCourse.places) {
-      if (!map.has(p.day)) map.set(p.day, []);
-      map.get(p.day)!.push(p);
-    }
-    return Array.from(map.keys()).sort((a, b) => a - b).map((d) =>
-      map.get(d)!.sort((a, b) => a.visit_order - b.visit_order).map((p) => ({
-        category: p.category,
-        place: p.place_name,
-        duration: p.time ?? "-",
-        address: p.memo ?? "",
-      }))
-    );
-  })() : null;
 
   const title = useAI ? generatedCourse.title : course?.title ?? "";
   const tags = useAI ? ["AI 생성"] : (course?.tags ?? []);
-  const initialDays = (useAI ? aiDays! : (course?.days.map((d) => d.items) ?? [])) as ScheduleItem[][];
   const allTransports = course?.days.map((d) => d.transports) ?? [];
-
-  const [editableDays, setEditableDays] = useState<ScheduleItem[][]>(initialDays);
 
   if (!useAI && !course) return null;
 
@@ -778,7 +791,7 @@ function CourseDetailStep({ form, generatedCourse }: { form: DesignFormData; gen
 
   const handleDeletePlace = () => {
     if (!activeItem) return;
-    setEditableDays((prev) => prev.map((day, di) =>
+    onChangeDays(editableDays.map((day, di) =>
       di === activeItem.dayIndex ? day.filter((_, ii) => ii !== activeItem.itemIndex) : day
     ));
     closeSheets();
@@ -786,10 +799,10 @@ function CourseDetailStep({ form, generatedCourse }: { form: DesignFormData; gen
 
   const handleSelectPlace = (place: Place) => {
     if (!activeItem) return;
-    setEditableDays((prev) => prev.map((day, di) =>
+    onChangeDays(editableDays.map((day, di) =>
       di === activeItem.dayIndex
         ? day.map((it, ii) => ii === activeItem.itemIndex
-          ? { ...it, place: place.place_name, address: place.address ?? "", image: place.place_image ?? undefined }
+          ? { ...it, place: place.place_name, address: place.address ?? "", image: place.place_image ?? undefined, placeId: place.id }
           : it)
         : day
     ));
@@ -944,7 +957,7 @@ function CourseDetailStep({ form, generatedCourse }: { form: DesignFormData; gen
 // ============================================================
 function SaveStep({
   form, setForm, onSave, saving,
-}: StepProps & { onSave: (isDraft: boolean) => void; saving: boolean }) {
+}: StepProps & { onSave: () => void; saving: boolean }) {
   const course = form.selectedCourseIndex !== null ? MOCK_COURSES[form.selectedCourseIndex] : null;
 
   return (
@@ -962,30 +975,9 @@ function SaveStep({
         />
       </div>
 
-      <div className={styles.toggleField}>
-        <div className={styles.toggleInfo}>
-          <span className={styles.toggleLabel}>커뮤니티 공유</span>
-          <span className={styles.toggleHint}>다른 사람들이 내 코스를 볼 수 있어요</span>
-        </div>
-        <button
-          className={`${styles.toggle} ${form.isShared ? styles.toggleOn : ""}`}
-          onClick={() => setForm((p) => ({ ...p, isShared: !p.isShared }))}
-        >
-          <span className={styles.toggleThumb} />
-        </button>
-      </div>
-
-      <div className={styles.toggleField}>
-        <div className={styles.toggleInfo}>
-          <span className={styles.toggleLabel}>동행 모집</span>
-          <span className={styles.toggleHint}>함께 여행할 동행을 모집해요</span>
-        </div>
-        <button
-          className={`${styles.toggle} ${form.isRecruiting ? styles.toggleOn : ""}`}
-          onClick={() => setForm((p) => ({ ...p, isRecruiting: !p.isRecruiting }))}
-        >
-          <span className={styles.toggleThumb} />
-        </button>
+      <div className={styles.saveField}>
+        <span className={styles.saveLabel}>공개 설정</span>
+        <VisibilityPicker value={form.visibility} onChange={(visibility) => setForm((p) => ({ ...p, visibility }))} />
       </div>
     </div>
   );

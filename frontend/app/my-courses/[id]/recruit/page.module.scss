@@ -1,0 +1,219 @@
+@import "../../../../styles/variables";
+@import "../../../../styles/mixins";
+
+$btn-dark: #1e1e1e;
+$btn-default: #e0e0e0;
+$header-bg: #f0f0f0;
+
+.page {
+  @include flex-column;
+  height: 100%;
+  background: $color-background-gray;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 56px;
+  padding: 0 10px 0 4px;
+  background: $header-bg;
+  flex-shrink: 0;
+}
+
+.backBtn {
+  @include button-reset;
+  @include flex-center;
+  width: 40px;
+  height: 40px;
+  color: $color-text;
+  cursor: pointer;
+}
+
+.headerTitle {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+  color: $color-text;
+}
+
+.message {
+  padding: 32px 16px;
+  text-align: center;
+  color: $color-text-muted;
+}
+
+.scroll {
+  @include flex-column;
+  flex: 1;
+  gap: 24px;
+  overflow-y: auto;
+  padding: 20px 20px 32px;
+}
+
+.intro {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  line-height: 1.5;
+
+  strong {
+    font-weight: $font-weight-semibold;
+    color: $color-text;
+  }
+}
+
+.field {
+  @include flex-column;
+  gap: 8px;
+}
+
+.label {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $color-text;
+}
+
+.hint {
+  font-size: $font-size-xs;
+  color: $color-text-muted;
+}
+
+.input,
+.textarea {
+  width: 100%;
+  border: 1.5px solid $color-border;
+  border-radius: 6px;
+  background: $color-background;
+  font-family: $font-family-base;
+  font-size: $font-size-base;
+  color: $color-text;
+  outline: none;
+  box-sizing: border-box;
+
+  &:focus { border-color: $color-primary; }
+}
+
+.input {
+  height: 48px;
+  padding: 0 12px;
+}
+
+.textarea {
+  padding: 12px;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.dateRow {
+  display: flex;
+  gap: 10px;
+}
+
+.dateField {
+  @include flex-column;
+  flex: 1;
+  min-width: 0;
+  gap: 4px;
+}
+
+.dateCaption {
+  font-size: $font-size-xs;
+  color: $color-text-muted;
+}
+
+.stepperRow {
+  @include flex-between;
+}
+
+.stepper {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border: 1.5px solid $color-border;
+  border-radius: $radius-full;
+  background: $color-background;
+  padding: 3px;
+}
+
+.stepperBtn {
+  @include button-reset;
+  @include flex-center;
+  width: 36px;
+  height: 36px;
+  border-radius: $radius-full;
+  color: $color-text;
+  cursor: pointer;
+
+  &:disabled {
+    color: $color-border;
+    cursor: default;
+  }
+}
+
+.stepperValue {
+  min-width: 44px;
+  text-align: center;
+  font-size: $font-size-base;
+  font-weight: $font-weight-semibold;
+  color: $color-text;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  @include button-reset;
+  height: 38px;
+  padding: 0 14px;
+  border: 1.5px solid $color-border;
+  border-radius: $radius-full;
+  background: $color-background;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  cursor: pointer;
+  transition: border-color $transition-fast, background $transition-fast, color $transition-fast;
+
+  &.chipSelected {
+    border-color: $color-primary;
+    background: rgba($color-primary, 0.08);
+    color: $color-primary;
+    font-weight: $font-weight-semibold;
+  }
+}
+
+.bottomBar {
+  display: flex;
+  gap: 10px;
+  padding: 10px 20px;
+  padding-bottom: calc(10px + env(safe-area-inset-bottom));
+  background: $color-background;
+  border-top: 1px solid $color-border-light;
+  flex-shrink: 0;
+}
+
+.btnCancel,
+.btnSubmit {
+  @include button-reset;
+  height: 52px;
+  border-radius: 6px;
+  font-size: $font-size-base;
+  cursor: pointer;
+}
+
+.btnCancel {
+  width: 90px;
+  background: $btn-default;
+  font-weight: $font-weight-semibold;
+  color: $btn-dark;
+}
+
+.btnSubmit {
+  flex: 1;
+  background: $btn-dark;
+  font-weight: $font-weight-bold;
+  color: #e0e0e0;
+
+  &:disabled { opacity: 0.6; cursor: default; }
+}

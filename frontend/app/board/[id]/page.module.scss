@@ -143,6 +143,13 @@ $header-bg: #f0f0f0;
   color: $color-text-secondary;
 }
 
+.likeBtn {
+  @include button-reset;
+  cursor: pointer;
+
+  &.liked { color: $color-error; }
+}
+
 .statDivider {
   width: 1px;
   height: 20px;
@@ -216,6 +223,23 @@ $header-bg: #f0f0f0;
   background: $color-primary;
   border-radius: $radius-full;
   transition: width $transition-base;
+}
+
+.recruitMeta {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  font-size: $font-size-xs;
+  color: $color-text-muted;
+}
+
+.recruitContent {
+  width: 100%;
+  font-size: $font-size-sm;
+  line-height: 1.5;
+  color: $color-text-secondary;
+  white-space: pre-wrap;
 }
 
 // ============================================================

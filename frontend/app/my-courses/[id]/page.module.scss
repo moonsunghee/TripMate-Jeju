@@ -70,7 +70,7 @@ $header-bg: #f0f0f0;
   color: #E67700;
 }
 
-.badge_draft {
+.badge_completed {
   background: #e9ecef;
   color: $color-text-muted;
 }
@@ -488,6 +488,10 @@ $header-bg: #f0f0f0;
   color: $btn-dark;
   cursor: pointer;
   flex-shrink: 0;
+}
+
+.btnDelete {
+  color: $color-error;
 }
 
 .btnShare {

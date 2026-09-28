@@ -4,14 +4,17 @@ import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import {
   RiArrowLeftLine, RiMapPin2Line, RiRouteLine, RiCalendarLine,
-  RiHeartLine, RiTimeLine, RiCarLine, RiGroupLine,
+  RiHeartLine, RiHeartFill, RiTimeLine, RiCarLine, RiGroupLine,
   RiRestaurantLine, RiCupLine, RiHome2Line, RiWalkLine,
   RiAnchorLine, RiRunLine, RiFlag2Line,
 } from "react-icons/ri";
 import type { IconType } from "react-icons";
 import { api, ApiError } from "@/lib/api";
-import type { CompanionPost, Course, CoursePlace } from "@/lib/types";
-import { authStorage } from "@/lib/auth";
+import {
+  COMPANION_AGE_LABELS, COMPANION_GENDER_LABELS,
+  type CompanionPost, type Course, type CourseLikeStatus, type CoursePlace,
+} from "@/lib/types";
+import { authStorage, type UserResponse } from "@/lib/auth";
 import KakaoMap from "@/components/KakaoMap";
 import styles from "./page.module.scss";
 
@@ -49,6 +52,9 @@ export default function BoardDetailPage() {
   const [joinDone, setJoinDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [like, setLike] = useState<CourseLikeStatus | null>(null);
+  const [liking, setLiking] = useState(false);
+  const [me, setMe] = useState<UserResponse | null>(null);
 
   const isCompanionPost = id.startsWith("p");
   const isSharedCourse = id.startsWith("c");
@@ -75,6 +81,32 @@ export default function BoardDetailPage() {
       setLoading(false);
     }
   }, [id, numericId, isCompanionPost, isSharedCourse]);
+
+  useEffect(() => {
+    if (!authStorage.getToken()) return;
+    api.get<UserResponse>("/api/auth/me").then(setMe).catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    if (!course) return;
+    setLike({ liked: false, like_count: course.like_count });
+    if (!authStorage.getToken()) return;
+    api.get<CourseLikeStatus>(`/api/courses/${course.id}/like`).then(setLike).catch(() => {});
+  }, [course]);
+
+  const handleLike = async () => {
+    if (!course || !like || liking) return;
+    if (!authStorage.getToken()) { router.push("/login"); return; }
+    setLiking(true);
+    try {
+      const path = `/api/courses/${course.id}/like`;
+      setLike(like.liked ? await api.delete<CourseLikeStatus>(path) : await api.post<CourseLikeStatus>(path, {}));
+    } catch (e) {
+      if (e instanceof ApiError) alert(e.message);
+    } finally {
+      setLiking(false);
+    }
+  };
 
   const handleJoin = async () => {
     const token = authStorage.getToken();
@@ -125,9 +157,18 @@ export default function BoardDetailPage() {
   const currentDay = days[activeDay - 1] ?? [];
   const currentPeople = post?.current_people ?? 1;
   const maxPeople = post?.max_people ?? 0;
-  const isFull = isCompanionPost ? currentPeople >= maxPeople : false;
+  const isClosed = post?.status === "completed"
+    || (!!post?.recruit_deadline && post.recruit_deadline < new Date().toLocaleDateString("sv-SE"));
+  const isFull = isCompanionPost ? currentPeople >= maxPeople || isClosed : false;
+  const isMyPost = !!post && !!me && post.user_id === me.id;
   const fillPct = isCompanionPost ? Math.round((currentPeople / maxPeople) * 100) : 0;
-  const deadline = post?.end_date ?? "-";
+  const deadline = post?.recruit_deadline ?? "-";
+  const conditions = post
+    ? [
+        COMPANION_GENDER_LABELS[post.gender],
+        post.age_groups.length ? post.age_groups.map((a) => COMPANION_AGE_LABELS[a]).join("·") : "연령 무관",
+      ]
+    : [];
   const duration = course?.duration_days ? `${course.duration_days}일` : "-";
 
   return (
@@ -169,10 +210,17 @@ export default function BoardDetailPage() {
             <span>{duration}</span>
           </div>
           <div className={styles.statDivider} />
-          <div className={styles.statItem}>
-            <RiHeartLine size={16} />
-            <span>0</span>
-          </div>
+          <button
+            type="button"
+            className={`${styles.statItem} ${styles.likeBtn} ${like?.liked ? styles.liked : ""}`}
+            onClick={handleLike}
+            disabled={liking}
+            aria-pressed={like?.liked ?? false}
+            aria-label="좋아요"
+          >
+            {like?.liked ? <RiHeartFill size={16} /> : <RiHeartLine size={16} />}
+            <span>{like?.like_count ?? 0}</span>
+          </button>
         </div>
 
         {/* 모집 현황 (companion post 전용) */}
@@ -191,6 +239,13 @@ export default function BoardDetailPage() {
             <div className={styles.recruitBarWrap}>
               <div className={styles.recruitBar} style={{ width: `${fillPct}%` }} />
             </div>
+            <div className={styles.recruitMeta}>
+              {post.start_date && (
+                <span>여행 {post.start_date}{post.end_date && post.end_date !== post.start_date ? ` ~ ${post.end_date}` : ""}</span>
+              )}
+              <span>{conditions.join(" · ")}</span>
+            </div>
+            {post.content && <p className={styles.recruitContent}>{post.content}</p>}
           </div>
         )}
 
@@ -272,7 +327,11 @@ export default function BoardDetailPage() {
       {/* Bottom bar */}
       <div className={styles.bottomBar}>
         <button className={styles.btnPrev} onClick={() => router.back()}>취소</button>
-        {isCompanionPost ? (
+        {isMyPost ? (
+          <button className={styles.btnNext} onClick={() => router.push(`/my-courses/${post.course_id}`)}>
+            내 코스에서 관리
+          </button>
+        ) : isCompanionPost ? (
           <button
             className={`${styles.btnNext} ${isFull || joinDone ? styles.btnNextDisabled : ""}`}
             disabled={isFull || joinDone || joining}

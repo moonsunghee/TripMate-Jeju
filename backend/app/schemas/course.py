@@ -42,7 +42,7 @@ class CourseCreate(BaseModel):
     transport: Optional[str] = None
     is_shared: bool = False
     is_recruiting: bool = False
-    status: str = "draft"
+    status: str = "master"
     start_date: Optional[date] = None
     end_date: Optional[date] = None
     places: List[CoursePlaceCreate] = []
@@ -90,6 +90,7 @@ class CourseResponse(BaseModel):
     created_at: datetime
     updated_at: Optional[datetime]
     user: Optional[AuthorInfo]
+    like_count: int = 0
     course_places: List[CoursePlaceResponse] = []
 
     model_config = {"from_attributes": True}
@@ -110,8 +111,14 @@ class CourseListItem(BaseModel):
     end_date: Optional[date]
     created_at: datetime
     user: Optional[AuthorInfo]
+    like_count: int = 0
 
     model_config = {"from_attributes": True}
+
+
+class CourseLikeResponse(BaseModel):
+    liked: bool
+    like_count: int
 
 
 # ── AI 코스 생성 요청 ────────────────────────────────────────────────────────────

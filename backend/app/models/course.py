@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, Date, DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy import Boolean, Column, Date, DateTime, ForeignKey, Integer, String, Text, UniqueConstraint
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
@@ -19,8 +19,8 @@ class Course(Base):
     transport = Column(String, nullable=True)       # 렌터카, 대중교통, 도보
     is_shared = Column(Boolean, default=False)
     is_recruiting = Column(Boolean, default=False)
-    # draft / master / sharing / recruiting / completed / discarded
-    status = Column(String, default="draft")
+    # master / sharing / recruiting / completed / discarded
+    status = Column(String, default="master")
     start_date = Column(Date, nullable=True)
     end_date = Column(Date, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
@@ -28,7 +28,12 @@ class Course(Base):
 
     user = relationship("User", back_populates="courses")
     course_places = relationship("CoursePlace", back_populates="course", cascade="all, delete-orphan")
-    companion_posts = relationship("CompanionPost", back_populates="course")
+    companion_posts = relationship("CompanionPost", back_populates="course", cascade="all, delete-orphan")
+    likes = relationship("CourseLike", back_populates="course", cascade="all, delete-orphan")
+
+    @property
+    def like_count(self):
+        return len(self.likes)
 
 
 class CoursePlace(Base):
@@ -51,3 +56,15 @@ class CoursePlace(Base):
     @property
     def place_image(self):
         return self.place.place_image if self.place else None
+
+
+class CourseLike(Base):
+    __tablename__ = "course_likes"
+    __table_args__ = (UniqueConstraint("course_id", "user_id"),)
+
+    id = Column(Integer, primary_key=True, index=True)
+    course_id = Column(Integer, ForeignKey("courses.id"), nullable=False, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    course = relationship("Course", back_populates="likes")

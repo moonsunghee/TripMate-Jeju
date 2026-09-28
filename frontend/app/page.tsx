@@ -6,11 +6,11 @@ import { useRouter } from "next/navigation";
 import {
   RiBellLine, RiArrowRightSLine,
   RiCompass3Line, RiMapLine, RiNewspaperLine, RiMessage2Line,
-  RiHeartLine, RiMapPinLine, RiCalendarLine, RiGroupLine,
+  RiHeartLine, RiMapPinLine, RiCalendarLine,
 } from "react-icons/ri";
 import { api } from "@/lib/api";
 import { authStorage, type UserResponse } from "@/lib/auth";
-import type { Course, CompanionPost } from "@/lib/types";
+import type { Course } from "@/lib/types";
 import styles from "./page.module.scss";
 
 const QUICK_MENUS = [
@@ -28,14 +28,66 @@ const STYLE_COLORS: Record<string, string> = {
 const DEFAULT_COLOR = "#52B788";
 const getColor = (style: string | null) => STYLE_COLORS[style ?? ""] ?? DEFAULT_COLOR;
 
+function CourseCard({ course, href }: { course: Course; href: string }) {
+  const color = getColor(course.travel_style);
+  const tags = course.travel_style ? [course.travel_style] : [];
+  const duration = course.duration_days ? `${course.duration_days}일` : "-";
+  return (
+    <Link href={href} className={styles.courseCard}>
+      <div className={styles.courseCardThumb} style={{ background: `linear-gradient(135deg, ${color}cc, ${color})` }}>
+        <div className={styles.courseCardTags}>
+          {tags.slice(0, 2).map((tag) => (
+            <span key={tag} className={styles.courseCardTag}>{tag}</span>
+          ))}
+        </div>
+      </div>
+      <div className={styles.courseCardBody}>
+        <p className={styles.courseCardTitle}>{course.title}</p>
+        <div className={styles.courseCardMeta}>
+          <span><RiMapPinLine size={11} /> {course.region ?? "-"}</span>
+          <span><RiCalendarLine size={11} /> {duration}</span>
+        </div>
+        <div className={styles.courseCardFoot}>
+          <span className={styles.courseCardAuthor}>by {course.user?.nickname ?? "-"}</span>
+          <span className={styles.courseCardLikes}><RiHeartLine size={12} /> {course.like_count}</span>
+        </div>
+      </div>
+    </Link>
+  );
+}
+
+function CourseSection({ title, moreHref, emptyText, courses, hrefOf }: {
+  title: string;
+  moreHref: string;
+  emptyText: string;
+  courses: Course[];
+  hrefOf: (course: Course) => string;
+}) {
+  return (
+    <section className={styles.section}>
+      <div className={styles.sectionHead}>
+        <h2 className={styles.sectionTitle}>{title}</h2>
+        <Link href={moreHref} className={styles.sectionMore}>
+          더보기 <RiArrowRightSLine size={16} />
+        </Link>
+      </div>
+      <div className={styles.cardScroll}>
+        {courses.length === 0 && <p className={styles.emptyHint}>{emptyText}</p>}
+        {courses.map((course) => (
+          <CourseCard key={course.id} course={course} href={hrefOf(course)} />
+        ))}
+      </div>
+    </section>
+  );
+}
+
 // ============================================================
 // Page
 // ============================================================
 export default function HomePage() {
   const router = useRouter();
   const [user, setUser] = useState<UserResponse | null>(null);
-  const [sharedCourses, setSharedCourses] = useState<Course[]>([]);
-  const [recruitingPosts, setRecruitingPosts] = useState<CompanionPost[]>([]);
+  const [recommendedCourses, setRecommendedCourses] = useState<Course[]>([]);
   const [myCourses, setMyCourses] = useState<Course[]>([]);
 
   useEffect(() => {
@@ -44,6 +96,7 @@ export default function HomePage() {
         setUser(u);
         // 내 코스 통계
         api.get<Course[]>("/api/courses/my").then(setMyCourses).catch(() => {});
+        api.get<Course[]>("/api/courses/recommended?size=5").then(setRecommendedCourses).catch(() => {});
       })
       .catch(() => {
         const mockUser = authStorage.getMockUser();
@@ -54,17 +107,12 @@ export default function HomePage() {
           router.push("/intro");
         }
       });
-
-    // 공개 공유 코스
-    api.get<Course[]>("/api/courses?size=5").then(setSharedCourses).catch(() => {});
-    // 동행 모집 중인 게시글
-    api.get<CompanionPost[]>("/api/companion?status=recruiting&size=5").then(setRecruitingPosts).catch(() => {});
   }, [router]);
 
   const initial = user?.nickname?.[0]?.toUpperCase() ?? "?";
   const totalCount = myCourses.length;
-  const sharingCount = myCourses.filter((c) => c.is_shared).length;
-  const recruitingCount = myCourses.filter((c) => c.is_recruiting).length;
+  const myRecruiting = myCourses.filter((c) => c.is_recruiting);
+  const mySharing = myCourses.filter((c) => c.is_shared && !c.is_recruiting);
 
   return (
     <div className={styles.page}>
@@ -94,12 +142,12 @@ export default function HomePage() {
           </div>
           <div className={styles.statDivider} />
           <div className={styles.statItem}>
-            <span className={styles.statNum}>{sharingCount}</span>
-            <span className={styles.statLabel}>공유중</span>
+            <span className={styles.statNum}>{mySharing.length}</span>
+            <span className={styles.statLabel}>공유코스</span>
           </div>
           <div className={styles.statDivider} />
           <div className={styles.statItem}>
-            <span className={styles.statNum}>{recruitingCount}</span>
+            <span className={styles.statNum}>{myRecruiting.length}</span>
             <span className={styles.statLabel}>모집중</span>
           </div>
         </div>
@@ -115,87 +163,27 @@ export default function HomePage() {
         ))}
       </div>
 
-      {/* 공유중인 추천코스 */}
-      <section className={styles.section}>
-        <div className={styles.sectionHead}>
-          <h2 className={styles.sectionTitle}>공유중인 추천코스</h2>
-          <Link href="/board" className={styles.sectionMore}>
-            더보기 <RiArrowRightSLine size={16} />
-          </Link>
-        </div>
-        <div className={styles.cardScroll}>
-          {sharedCourses.length === 0 && (
-            <p className={styles.emptyHint}>공유된 코스가 없습니다</p>
-          )}
-          {sharedCourses.map((course) => {
-            const color = getColor(course.travel_style);
-            const tags = course.travel_style ? [course.travel_style] : [];
-            const duration = course.duration_days ? `${course.duration_days}일` : "-";
-            return (
-              <Link key={course.id} href={`/board/c${course.id}`} className={styles.courseCard}>
-                <div className={styles.courseCardThumb} style={{ background: `linear-gradient(135deg, ${color}cc, ${color})` }}>
-                  <div className={styles.courseCardTags}>
-                    {tags.slice(0, 2).map((tag) => (
-                      <span key={tag} className={styles.courseCardTag}>{tag}</span>
-                    ))}
-                  </div>
-                </div>
-                <div className={styles.courseCardBody}>
-                  <p className={styles.courseCardTitle}>{course.title}</p>
-                  <div className={styles.courseCardMeta}>
-                    <span><RiMapPinLine size={11} /> {course.region ?? "-"}</span>
-                    <span><RiCalendarLine size={11} /> {duration}</span>
-                  </div>
-                  <div className={styles.courseCardFoot}>
-                    <span className={styles.courseCardAuthor}>by {course.user?.nickname ?? "-"}</span>
-                    <span className={styles.courseCardLikes}><RiHeartLine size={12} /> 0</span>
-                  </div>
-                </div>
-              </Link>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* 동행 모집중 */}
-      <section className={styles.section}>
-        <div className={styles.sectionHead}>
-          <h2 className={styles.sectionTitle}>동행 모집중</h2>
-          <Link href="/board" className={styles.sectionMore}>
-            더보기 <RiArrowRightSLine size={16} />
-          </Link>
-        </div>
-        <div className={styles.cardScroll}>
-          {recruitingPosts.length === 0 && (
-            <p className={styles.emptyHint}>모집 중인 게시글이 없습니다</p>
-          )}
-          {recruitingPosts.map((post) => {
-            const color = DEFAULT_COLOR;
-            const startDate = post.start_date ?? "-";
-            return (
-              <Link key={post.id} href={`/board/p${post.id}`} className={styles.courseCard}>
-                <div className={styles.courseCardThumb} style={{ background: `linear-gradient(135deg, ${color}cc, ${color})` }}>
-                  <div className={styles.recruitBadge}>
-                    <RiGroupLine size={12} /> {post.current_people}/{post.max_people}명
-                  </div>
-                </div>
-                <div className={styles.courseCardBody}>
-                  <p className={styles.courseCardTitle}>{post.title}</p>
-                  <div className={styles.courseCardMeta}>
-                    <span><RiCalendarLine size={11} /> {startDate}</span>
-                  </div>
-                  <div className={styles.progressWrap}>
-                    <div
-                      className={styles.progressBar}
-                      style={{ width: `${(post.current_people / post.max_people) * 100}%` }}
-                    />
-                  </div>
-                </div>
-              </Link>
-            );
-          })}
-        </div>
-      </section>
+      <CourseSection
+        title="공유중인 추천코스"
+        moreHref="/board"
+        emptyText="추천할 코스가 없습니다"
+        courses={recommendedCourses}
+        hrefOf={(c) => `/board/c${c.id}`}
+      />
+      <CourseSection
+        title="동행모집중"
+        moreHref="/my-courses"
+        emptyText="모집 중인 코스가 없습니다"
+        courses={myRecruiting}
+        hrefOf={(c) => `/my-courses/${c.id}`}
+      />
+      <CourseSection
+        title="코스공유중"
+        moreHref="/my-courses"
+        emptyText="공유 중인 코스가 없습니다"
+        courses={mySharing}
+        hrefOf={(c) => `/my-courses/${c.id}`}
+      />
     </div>
   );
 }

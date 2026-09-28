@@ -51,10 +51,26 @@ export interface Course {
   created_at: string;
   updated_at: string | null;
   user: UserInfo | null;
+  like_count: number;
   course_places: CoursePlace[];
 }
 
+export interface CourseLikeStatus {
+  liked: boolean;
+  like_count: number;
+}
+
 // ── 동행 게시글 ───────────────────────────────────────────────────────────────
+export type CompanionGender = "any" | "male" | "female";
+export type CompanionAgeGroup = "20s" | "30s" | "40s" | "50s+";
+
+export const COMPANION_GENDER_LABELS: Record<CompanionGender, string> = {
+  any: "성별 무관", male: "남성만", female: "여성만",
+};
+export const COMPANION_AGE_LABELS: Record<CompanionAgeGroup, string> = {
+  "20s": "20대", "30s": "30대", "40s": "40대", "50s+": "50대 이상",
+};
+
 export interface CompanionPost {
   id: number;
   course_id: number;
@@ -65,10 +81,14 @@ export interface CompanionPost {
   status: string;
   start_date: string | null;
   end_date: string | null;
+  recruit_deadline: string | null;
+  gender: CompanionGender;
+  age_groups: CompanionAgeGroup[];
   created_at: string;
   updated_at: string | null;
   user: UserInfo | null;
   current_people: number;
+  like_count: number;
 }
 
 // ── AI 생성 ───────────────────────────────────────────────────────────────────

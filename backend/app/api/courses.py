@@ -1,16 +1,19 @@
+from datetime import datetime, timedelta, timezone
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
 from app.db.session import get_db
-from app.models.course import Course, CoursePlace
+from app.models.course import Course, CourseLike, CoursePlace
 from app.models.user import User
 from app.schemas.course import (
     CourseCreate,
     CourseGenerateRequest,
     CourseGenerateResponse,
+    CourseLikeResponse,
     CourseListItem,
     CourseResponse,
     CourseUpdate,
@@ -56,6 +59,31 @@ def my_courses(
     if status:
         q = q.filter(Course.status == status)
     return q.order_by(Course.created_at.desc()).all()
+
+
+# ── 추천 코스 (타인의 공유 코스, 최근 30일 좋아요 순) ──────────────────────────────
+
+@router.get("/recommended", response_model=List[CourseListItem])
+def recommended_courses(
+    size: int = Query(10, ge=1, le=50),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    since = datetime.now(timezone.utc) - timedelta(days=30)
+    recent_likes = (
+        db.query(CourseLike.course_id, func.count(CourseLike.id).label("cnt"))
+        .filter(CourseLike.created_at >= since)
+        .group_by(CourseLike.course_id)
+        .subquery()
+    )
+    return (
+        db.query(Course)
+        .outerjoin(recent_likes, recent_likes.c.course_id == Course.id)
+        .filter(Course.is_shared == True, Course.user_id != current_user.id)  # noqa: E712
+        .order_by(func.coalesce(recent_likes.c.cnt, 0).desc(), Course.created_at.desc())
+        .limit(size)
+        .all()
+    )
 
 
 # ── AI 코스 생성 ────────────────────────────────────────────────────────────────
@@ -139,6 +167,60 @@ def get_my_course(
     return course
 
 
+# ── 좋아요 ─────────────────────────────────────────────────────────────────────
+
+def _get_likeable_course(course_id: int, db: Session) -> Course:
+    course = db.query(Course).filter(Course.id == course_id).first()
+    if not course:
+        raise HTTPException(status_code=404, detail="코스를 찾을 수 없습니다.")
+    if not course.is_shared:
+        raise HTTPException(status_code=403, detail="비공개 코스입니다.")
+    return course
+
+
+def _like_status(course: Course, user: User) -> CourseLikeResponse:
+    liked = any(like.user_id == user.id for like in course.likes)
+    return CourseLikeResponse(liked=liked, like_count=course.like_count)
+
+
+@router.get("/{course_id}/like", response_model=CourseLikeResponse)
+def get_like(
+    course_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    return _like_status(_get_likeable_course(course_id, db), current_user)
+
+
+@router.post("/{course_id}/like", response_model=CourseLikeResponse)
+def like_course(
+    course_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    course = _get_likeable_course(course_id, db)
+    if not any(like.user_id == current_user.id for like in course.likes):
+        course.likes.append(CourseLike(user_id=current_user.id))
+        db.commit()
+        db.refresh(course)
+    return _like_status(course, current_user)
+
+
+@router.delete("/{course_id}/like", response_model=CourseLikeResponse)
+def unlike_course(
+    course_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    course = _get_likeable_course(course_id, db)
+    db.query(CourseLike).filter(
+        CourseLike.course_id == course_id, CourseLike.user_id == current_user.id
+    ).delete()
+    db.commit()
+    db.refresh(course)
+    return _like_status(course, current_user)
+
+
 # ── 코스 수정 ───────────────────────────────────────────────────────────────────
 
 @router.put("/{course_id}", response_model=CourseResponse)
@@ -153,6 +235,8 @@ def update_course(
         raise HTTPException(status_code=404, detail="코스를 찾을 수 없습니다.")
     if course.user_id != current_user.id:
         raise HTTPException(status_code=403, detail="수정 권한이 없습니다.")
+    if course.is_shared or course.is_recruiting:
+        raise HTTPException(status_code=403, detail="공유 중이거나 모집 중인 코스는 편집할 수 없습니다.")
 
     for field, value in body.model_dump(exclude_unset=True, exclude={"places"}).items():
         setattr(course, field, value)

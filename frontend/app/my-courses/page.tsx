@@ -10,20 +10,21 @@ import {
 } from "react-icons/ri";
 import { api, ApiError } from "@/lib/api";
 import type { Course } from "@/lib/types";
+import ShareSheet from "@/components/ShareSheet";
 import styles from "./page.module.scss";
 
-type TabKey = "all" | "sharing" | "recruiting" | "draft";
+type TabKey = "all" | "private" | "sharing" | "recruiting";
 
 const TABS = [
   { key: "all" as TabKey, label: "전체" },
-  { key: "sharing" as TabKey, label: "공유중" },
+  { key: "private" as TabKey, label: "나만보기" },
+  { key: "sharing" as TabKey, label: "공유코스" },
   { key: "recruiting" as TabKey, label: "모집중" },
-  { key: "draft" as TabKey, label: "임시저장" },
 ];
 
 const STATUS_LABEL: Record<string, string> = {
-  draft: "임시저장", master: "Master", sharing: "공유중", recruiting: "모집중",
-  completed: "모집완료", discarded: "폐기됨",
+  master: "나만보기", sharing: "공유코스", recruiting: "모집중",
+  completed: "모집마감", discarded: "폐기됨",
 };
 
 const STYLE_COLORS: Record<string, string> = {
@@ -39,6 +40,7 @@ export default function MyCoursesPage() {
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<TabKey>("all");
   const [menuOpen, setMenuOpen] = useState<number | null>(null);
+  const [shareTarget, setShareTarget] = useState<Course | null>(null);
 
   useEffect(() => {
     api.get<Course[]>("/api/courses/my")
@@ -49,21 +51,22 @@ export default function MyCoursesPage() {
 
   const filtered = useMemo(() => {
     if (tab === "all") return courses;
+    if (tab === "private") return courses.filter((c) => !c.is_shared && !c.is_recruiting);
     if (tab === "sharing") return courses.filter((c) => c.is_shared && !c.is_recruiting);
     if (tab === "recruiting") return courses.filter((c) => c.is_recruiting);
-    if (tab === "draft") return courses.filter((c) => c.status === "draft");
     return courses;
   }, [courses, tab]);
 
   const counts = useMemo(() => ({
     all: courses.length,
+    private: courses.filter((c) => !c.is_shared && !c.is_recruiting).length,
     sharing: courses.filter((c) => c.is_shared && !c.is_recruiting).length,
     recruiting: courses.filter((c) => c.is_recruiting).length,
-    draft: courses.filter((c) => c.status === "draft").length,
   }), [courses]);
 
-  const handleDelete = async (courseId: number, title: string) => {
-    if (!confirm(`코스 "${title}"을 삭제할까요?`)) return;
+  const handleDelete = async (courseId: number, title: string, isRecruiting: boolean) => {
+    const warning = isRecruiting ? "\n동행 모집글과 신청 내역, 채팅방도 함께 삭제돼요." : "";
+    if (!confirm(`코스 "${title}"을 삭제할까요?${warning}`)) return;
     try {
       await api.delete(`/api/courses/${courseId}`);
       setCourses((prev) => prev.filter((c) => c.id !== courseId));
@@ -92,18 +95,18 @@ export default function MyCoursesPage() {
         </div>
         <div className={styles.statDivider} />
         <div className={styles.statItem}>
+          <span className={styles.statNum}>{counts.private}</span>
+          <span className={styles.statLabel}>나만보기</span>
+        </div>
+        <div className={styles.statDivider} />
+        <div className={styles.statItem}>
           <span className={styles.statNum}>{counts.sharing}</span>
-          <span className={styles.statLabel}>공유중</span>
+          <span className={styles.statLabel}>공유코스</span>
         </div>
         <div className={styles.statDivider} />
         <div className={styles.statItem}>
           <span className={styles.statNum}>{counts.recruiting}</span>
           <span className={styles.statLabel}>모집중</span>
-        </div>
-        <div className={styles.statDivider} />
-        <div className={styles.statItem}>
-          <span className={styles.statNum}>{counts.draft}</span>
-          <span className={styles.statLabel}>임시저장</span>
         </div>
       </div>
 
@@ -142,7 +145,7 @@ export default function MyCoursesPage() {
         {filtered.map((course) => {
           const color = getColor(course.travel_style);
           const tags = course.travel_style ? [course.travel_style] : [];
-          const badgeStatus = course.is_recruiting ? "recruiting" : course.is_shared ? "sharing" : course.status;
+          const badgeStatus = course.status === "completed" ? "completed" : course.is_recruiting ? "recruiting" : course.is_shared ? "sharing" : course.status;
 
           return (
             <div
@@ -179,21 +182,33 @@ export default function MyCoursesPage() {
                     </button>
                     {menuOpen === course.id && (
                       <div className={styles.dropdown}>
-                        <button
-                          className={styles.dropdownItem}
-                          onClick={() => { router.push(`/design?edit=${course.id}`); setMenuOpen(null); }}
-                        >
-                          <RiEditLine size={15} /> 편집
-                        </button>
-                        <button
-                          className={styles.dropdownItem}
-                          onClick={() => { alert("공유 기능 준비 중"); setMenuOpen(null); }}
-                        >
-                          <RiShareLine size={15} /> 공유하기
-                        </button>
+                        {!course.is_shared && !course.is_recruiting && (
+                          <>
+                            <button
+                              className={styles.dropdownItem}
+                              onClick={() => { router.push(`/my-courses/${course.id}/edit`); setMenuOpen(null); }}
+                            >
+                              <RiEditLine size={15} /> 편집
+                            </button>
+                            <button
+                              className={styles.dropdownItem}
+                              onClick={() => { setShareTarget(course); setMenuOpen(null); }}
+                            >
+                              <RiShareLine size={15} /> 공유하기
+                            </button>
+                          </>
+                        )}
+                        {course.is_shared && !course.is_recruiting && (
+                          <button
+                            className={styles.dropdownItem}
+                            onClick={() => { router.push(`/my-courses/${course.id}/recruit`); setMenuOpen(null); }}
+                          >
+                            <RiGroupLine size={15} /> 동행 모집 전환
+                          </button>
+                        )}
                         <button
                           className={`${styles.dropdownItem} ${styles.dropdownItemDanger}`}
-                          onClick={() => handleDelete(course.id, course.title)}
+                          onClick={() => handleDelete(course.id, course.title, course.is_recruiting)}
                         >
                           <RiDeleteBinLine size={15} /> 삭제
                         </button>
@@ -211,18 +226,24 @@ export default function MyCoursesPage() {
 
                 <div className={styles.foot}>
                   <span className={styles.updatedAt}>{(course.updated_at ?? course.created_at).slice(0, 10)} 수정</span>
-                  {course.status !== "draft" && (
-                    <span className={styles.stats}>
-                      <span><RiHeartLine size={12} /> 0</span>
-                      <span><RiMessage2Line size={12} /> 0</span>
-                    </span>
-                  )}
+                  <span className={styles.stats}>
+                    <span><RiHeartLine size={12} /> {course.like_count}</span>
+                    <span><RiMessage2Line size={12} /> 0</span>
+                  </span>
                 </div>
               </div>
             </div>
           );
         })}
       </div>
+      <ShareSheet
+        course={shareTarget}
+        onClose={() => setShareTarget(null)}
+        onShared={(updated) => {
+          setCourses((prev) => prev.map((c) => (c.id === updated.id ? { ...c, ...updated } : c)));
+          setShareTarget(null);
+        }}
+      />
     </div>
   );
 }

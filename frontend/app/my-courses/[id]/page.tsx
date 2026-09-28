@@ -6,15 +6,16 @@ import {
   RiArrowLeftLine, RiMapPin2Line, RiRouteLine, RiCalendarLine,
   RiHeartLine, RiTimeLine, RiCarLine, RiGroupLine,
   RiRestaurantLine, RiCupLine, RiHome2Line, RiWalkLine,
-  RiAnchorLine, RiRunLine, RiFlag2Line, RiEditLine, RiShareLine,
+  RiAnchorLine, RiRunLine, RiFlag2Line, RiEditLine, RiShareLine, RiDeleteBinLine,
   RiImageLine, RiCheckboxBlankCircleLine,
 } from "react-icons/ri";
 import type { IconType } from "react-icons";
-import { api } from "@/lib/api";
+import { api, ApiError } from "@/lib/api";
 import type { Course, CoursePlace, Place } from "@/lib/types";
 import KakaoMap from "@/components/KakaoMap";
 import PlaceDetailSheet, { type PlaceDetailData } from "@/components/ui/PlaceDetailSheet";
 import PlaceEditSheet from "@/components/ui/PlaceEditSheet";
+import ShareSheet from "@/components/ShareSheet";
 import styles from "./page.module.scss";
 
 const CATEGORY_ICONS: Record<string, IconType> = {
@@ -32,8 +33,8 @@ const CATEGORY_ICONS: Record<string, IconType> = {
 const PLACE_OPTIONS = ["주차", "포장", "예약", "24시간", "반려동반", "화장실"];
 
 const STATUS_LABEL: Record<string, string> = {
-  draft: "임시저장", master: "Master", sharing: "공유중",
-  recruiting: "모집중", completed: "모집완료", discarded: "폐기됨",
+  master: "나만보기", sharing: "공유코스",
+  recruiting: "모집중", completed: "모집마감", discarded: "폐기됨",
 };
 
 function groupByDay(places: CoursePlace[]): CoursePlace[][] {
@@ -56,6 +57,7 @@ export default function MyCourseDetailPage() {
   const [selectedPlace, setSelectedPlace] = useState<PlaceDetailData | null>(null);
   const [selectedPlaceId, setSelectedPlaceId] = useState<number | null>(null);
   const [sheetMode, setSheetMode] = useState<"view" | "edit">("view");
+  const [shareOpen, setShareOpen] = useState(false);
 
   const openPlaceDetail = (item: CoursePlace) => {
     setSelectedPlaceId(item.id);
@@ -152,7 +154,21 @@ export default function MyCourseDetailPage() {
     );
   }
 
-  const badgeStatus = course.is_recruiting ? "recruiting" : course.is_shared ? "sharing" : course.status;
+  const isEditable = !course.is_shared && !course.is_recruiting;
+  const canStartRecruit = course.is_shared && !course.is_recruiting;
+
+  const handleDelete = async () => {
+    const warning = course.is_recruiting ? "\n동행 모집글과 신청 내역, 채팅방도 함께 삭제돼요." : "";
+    if (!confirm(`코스 "${course.title}"을 삭제할까요?${warning}`)) return;
+    try {
+      await api.delete(`/api/courses/${course.id}`);
+      router.replace("/my-courses");
+    } catch (e) {
+      if (e instanceof ApiError) alert(e.message);
+    }
+  };
+
+  const badgeStatus = course.status === "completed" ? "completed" : course.is_recruiting ? "recruiting" : course.is_shared ? "sharing" : course.status;
   const tags = course.travel_style ? [course.travel_style] : [];
   const days = groupByDay(course.course_places);
   const currentDay = days[activeDay - 1] ?? [];
@@ -201,7 +217,7 @@ export default function MyCourseDetailPage() {
           <div className={styles.statDivider} />
           <div className={styles.statItem}>
             <RiHeartLine size={16} />
-            <span>0</span>
+            <span>{course.like_count}</span>
           </div>
         </div>
 
@@ -210,7 +226,9 @@ export default function MyCourseDetailPage() {
           <div className={styles.recruitStrip}>
             <div className={styles.recruitLeft}>
               <RiGroupLine size={14} className={styles.recruitIcon} />
-              <span className={styles.recruitText}>동행 모집중</span>
+              <span className={styles.recruitText}>
+                {course.status === "completed" ? "동행 모집마감" : "동행 모집중"}
+              </span>
             </div>
           </div>
         )}
@@ -315,24 +333,46 @@ export default function MyCourseDetailPage() {
 
       {/* Bottom bar */}
       <div className={styles.bottomBar}>
-        <button
-          className={styles.btnEdit}
-          onClick={() => router.push(`/design?edit=${course.id}`)}
-        >
-          <RiEditLine size={16} />
-          편집
-        </button>
-        <button
-          className={styles.btnShare}
-          onClick={() => alert("공유 기능 준비 중")}
-        >
-          <RiShareLine size={16} />
-          {course.status === "draft" ? "공유하기" : "공유 관리"}
-        </button>
+        {isEditable ? (
+          <>
+            <button
+              className={styles.btnEdit}
+              onClick={() => router.push(`/my-courses/${course.id}/edit`)}
+            >
+              <RiEditLine size={16} />
+              편집
+            </button>
+            <button
+              className={styles.btnShare}
+              onClick={() => setShareOpen(true)}
+            >
+              <RiShareLine size={16} />
+              공유하기
+            </button>
+          </>
+        ) : (
+          <>
+            <button className={`${styles.btnEdit} ${styles.btnDelete}`} onClick={handleDelete}>
+              <RiDeleteBinLine size={16} />
+              삭제
+            </button>
+            <button
+              className={styles.btnShare}
+              onClick={() => router.push(`/my-courses/${course.id}/recruit`)}
+            >
+              <RiGroupLine size={16} />
+              {canStartRecruit ? "동행 모집 전환" : "모집 설정"}
+            </button>
+          </>
+        )}
       </div>
 
       {sheetMode === "view" && (
-        <PlaceDetailSheet data={selectedPlace} onClose={closeSheets} onEdit={() => setSheetMode("edit")} />
+        <PlaceDetailSheet
+          data={selectedPlace}
+          onClose={closeSheets}
+          onEdit={isEditable ? () => setSheetMode("edit") : undefined}
+        />
       )}
       {sheetMode === "edit" && (
         <PlaceEditSheet
@@ -342,6 +382,11 @@ export default function MyCourseDetailPage() {
           onSelectPlace={handleSelectPlace}
         />
       )}
+      <ShareSheet
+        course={shareOpen ? course : null}
+        onClose={() => setShareOpen(false)}
+        onShared={(updated) => { setCourse(updated); setShareOpen(false); }}
+      />
     </div>
   );
 }

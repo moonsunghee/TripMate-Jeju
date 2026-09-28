@@ -1,0 +1,281 @@
+@import "../../../../styles/variables";
+@import "../../../../styles/mixins";
+
+$btn-dark: #1e1e1e;
+$btn-default: #e0e0e0;
+$header-bg: #f0f0f0;
+
+.page {
+  @include flex-column;
+  height: 100%;
+  background: $color-background-gray;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 56px;
+  padding: 0 10px 0 4px;
+  background: $header-bg;
+  flex-shrink: 0;
+}
+
+.backBtn {
+  @include button-reset;
+  @include flex-center;
+  width: 40px;
+  height: 40px;
+  color: $color-text;
+  cursor: pointer;
+}
+
+.headerTitle {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+  color: $color-text;
+}
+
+.message {
+  padding: 32px 16px;
+  text-align: center;
+  color: $color-text-muted;
+}
+
+.scroll {
+  @include flex-column;
+  flex: 1;
+  gap: 24px;
+  overflow-y: auto;
+  padding: 20px 20px 32px;
+}
+
+.field {
+  @include flex-column;
+  gap: 8px;
+}
+
+.label {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $color-text;
+}
+
+.input,
+.textarea,
+.select,
+.timeInput {
+  border: 1.5px solid $color-border;
+  border-radius: 6px;
+  background: $color-background;
+  font-family: $font-family-base;
+  color: $color-text;
+  outline: none;
+  box-sizing: border-box;
+
+  &:focus { border-color: $color-primary; }
+}
+
+.input {
+  width: 100%;
+  height: 44px;
+  padding: 0 12px;
+  font-size: $font-size-base;
+}
+
+.textarea {
+  width: 100%;
+  padding: 12px;
+  font-size: $font-size-base;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.select,
+.timeInput {
+  height: 36px;
+  padding: 0 8px;
+  font-size: $font-size-sm;
+}
+
+.select { min-width: 0; flex: 1; }
+.timeInput { width: 128px; flex-shrink: 0; }
+
+// ── Day tabs ──────────────────────────────────────────────
+.dayTabs {
+  @include hide-scrollbar;
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+}
+
+.dayTab,
+.dayAdd {
+  @include button-reset;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 36px;
+  padding: 0 14px;
+  border-radius: $radius-full;
+  font-size: $font-size-sm;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.dayTab {
+  border: 1.5px solid $color-border;
+  background: $color-background;
+  color: $color-text-secondary;
+
+  &.dayTabActive {
+    border-color: $btn-dark;
+    background: $btn-dark;
+    color: #fff;
+    font-weight: $font-weight-semibold;
+  }
+}
+
+.dayCount {
+  font-size: $font-size-xs;
+  opacity: 0.7;
+}
+
+.dayAdd {
+  border: 1.5px dashed $color-border;
+  background: transparent;
+  color: $color-text-muted;
+}
+
+.emptyDay {
+  padding: 16px 0;
+  text-align: center;
+  font-size: $font-size-sm;
+  color: $color-text-muted;
+}
+
+// ── Places ────────────────────────────────────────────────
+.placeList {
+  @include flex-column;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.placeItem {
+  display: flex;
+  gap: 8px;
+}
+
+.placeNum {
+  @include flex-center;
+  width: 24px;
+  height: 24px;
+  margin-top: 6px;
+  border-radius: $radius-full;
+  background: $btn-dark;
+  color: #fff;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-bold;
+  flex-shrink: 0;
+}
+
+.placeCard {
+  @include flex-column;
+  flex: 1;
+  min-width: 0;
+  gap: 8px;
+  padding: 12px;
+  border-radius: $radius-lg;
+  background: $color-background;
+  box-shadow: $shadow-sm;
+}
+
+.placeRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.placeActions {
+  display: flex;
+  flex-shrink: 0;
+
+  button {
+    @include button-reset;
+    @include flex-center;
+    width: 30px;
+    height: 36px;
+    color: $color-text-secondary;
+    cursor: pointer;
+
+    &:disabled { color: $color-border; cursor: default; }
+  }
+
+  .removeBtn { color: $color-error; }
+}
+
+.dayActions {
+  @include flex-between;
+}
+
+.addPlaceBtn,
+.removeDayBtn {
+  @include button-reset;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 36px;
+  font-size: $font-size-sm;
+  cursor: pointer;
+}
+
+.addPlaceBtn {
+  padding: 0 14px;
+  border: 1.5px solid $color-primary;
+  border-radius: $radius-full;
+  color: $color-primary;
+  font-weight: $font-weight-semibold;
+}
+
+.removeDayBtn {
+  color: $color-text-muted;
+  text-decoration: underline;
+}
+
+// ── Bottom bar ────────────────────────────────────────────
+.bottomBar {
+  display: flex;
+  gap: 10px;
+  padding: 10px 20px;
+  padding-bottom: calc(10px + env(safe-area-inset-bottom));
+  background: $color-background;
+  border-top: 1px solid $color-border-light;
+  flex-shrink: 0;
+}
+
+.btnCancel,
+.btnSubmit {
+  @include button-reset;
+  height: 52px;
+  border-radius: 6px;
+  font-size: $font-size-base;
+  cursor: pointer;
+
+  &:disabled { opacity: 0.6; cursor: default; }
+}
+
+.btnCancel {
+  width: 80px;
+  background: $btn-default;
+  font-weight: $font-weight-semibold;
+  color: $btn-dark;
+}
+
+.btnSubmit {
+  flex: 1;
+  background: $btn-dark;
+  font-weight: $font-weight-bold;
+  color: #e0e0e0;
+}

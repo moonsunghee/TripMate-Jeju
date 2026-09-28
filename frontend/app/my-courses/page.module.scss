@@ -192,7 +192,6 @@
   background: $color-background;
   border-radius: $radius-xl;
   box-shadow: $shadow-sm;
-  overflow: hidden;
   display: flex;
   flex-direction: column;
 }
@@ -201,6 +200,7 @@
 .thumb {
   position: relative;
   height: 120px;
+  border-radius: $radius-xl $radius-xl 0 0;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -271,9 +271,9 @@
   color: #1971C2;
 }
 
-.badge_draft {
-  background: rgba(#F59F00, 0.15);
-  color: #E67700;
+.badge_completed {
+  background: #e9ecef;
+  color: $color-text-muted;
 }
 
 .recruitCount {
@@ -329,6 +329,7 @@
   width: 100%;
   padding: 11px 16px;
   font-size: $font-size-sm;
+  white-space: nowrap;
   color: $color-text-secondary;
   cursor: pointer;
   transition: background $transition-fast;

@@ -255,20 +255,6 @@
   padding: 10px;
 }
 
-.recruitBadge {
-  align-self: flex-start;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px 8px;
-  background: rgba(0, 0, 0, 0.35);
-  border-radius: $radius-full;
-  font-size: 11px;
-  color: #fff;
-  font-weight: $font-weight-semibold;
-  backdrop-filter: blur(4px);
-}
-
 .courseCardTags {
   display: flex;
   flex-wrap: wrap;
@@ -334,22 +320,4 @@
   gap: 3px;
   font-size: 11px;
   color: $color-text-muted;
-}
-
-// ============================================================
-// Recruit progress bar
-// ============================================================
-.progressWrap {
-  height: 4px;
-  background: $color-border-light;
-  border-radius: $radius-full;
-  overflow: hidden;
-  margin-top: 4px;
-}
-
-.progressBar {
-  height: 100%;
-  background: $color-primary;
-  border-radius: $radius-full;
-  transition: width $transition-base;
 }

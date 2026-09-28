@@ -24,10 +24,12 @@ interface UnifiedPost {
   region: string;
   duration: string;
   date: string;
+  likes: number;
   comments: number;
   cardColor: string;
   current?: number;
   max?: number;
+  closed?: boolean;
 }
 
 const STYLE_COLORS: Record<string, string> = {
@@ -47,6 +49,7 @@ function courseToPost(c: Course): UnifiedPost {
     region: c.region ?? "-",
     duration: c.duration_days ? `${c.duration_days}일` : "-",
     date: c.created_at.slice(0, 10),
+    likes: c.like_count,
     comments: 0,
     cardColor: getColor(c.travel_style),
   };
@@ -64,10 +67,12 @@ function companionToPost(p: CompanionPost): UnifiedPost {
       ? `${p.start_date} ~ ${p.end_date}`
       : p.start_date ?? "-",
     date: p.created_at.slice(0, 10),
+    likes: p.like_count,
     comments: 0,
     cardColor: "#2D6A4F",
     current: p.current_people,
     max: p.max_people,
+    closed: p.status === "completed",
   };
 }
 
@@ -86,7 +91,7 @@ export default function BoardPage() {
   useEffect(() => {
     setLoading(true);
     Promise.all([
-      api.get<Course[]>("/api/courses?size=50"),
+      api.get<Course[]>("/api/courses?size=50&is_recruiting=false"),
       api.get<CompanionPost[]>("/api/companion?size=50"),
     ]).then(([courses, companions]) => {
       setSharedCourses(courses);
@@ -145,7 +150,7 @@ export default function BoardPage() {
               className={`${styles.tab} ${tab === t ? styles.tabActive : ""}`}
               onClick={() => handleTabChange(t)}
             >
-              {t === "all" ? "전체" : t === "shared" ? "공유중" : "모집중"}
+              {t === "all" ? "전체" : t === "shared" ? "공유코스" : "모집중"}
             </button>
           ))}
         </div>
@@ -177,7 +182,7 @@ export default function BoardPage() {
             <div className={styles.cardContent}>
               <div className={styles.cardTop}>
                 <span className={`${styles.statusBadge} ${post.type === "shared" ? styles.badgeShared : styles.badgeRecruiting}`}>
-                  {post.type === "shared" ? "공유중" : "모집중"}
+                  {post.type === "shared" ? "공유코스" : post.closed ? "모집마감" : "모집중"}
                 </span>
                 {post.type === "recruiting" && (
                   <span className={styles.recruitCount}>
@@ -206,7 +211,7 @@ export default function BoardPage() {
                   <span>{post.duration}</span>
                 </span>
                 <span className={styles.cardStats}>
-                  <span><RiHeartLine size={13} /> 0</span>
+                  <span><RiHeartLine size={13} /> {post.likes}</span>
                   <span><RiMessage2Line size={13} /> {post.comments}</span>
                 </span>
               </div>
