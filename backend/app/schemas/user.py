@@ -29,6 +29,31 @@ class LoginRequest(BaseModel):
     password: str
 
 
+class ProfileUpdateRequest(BaseModel):
+    nickname: Optional[str] = None
+    bio: Optional[str] = None
+    profile_image: Optional[str] = None
+
+    @field_validator("nickname")
+    @classmethod
+    def nickname_min_length(cls, v: Optional[str]) -> Optional[str]:
+        if v is None:
+            return v
+        if len(v.strip()) < 2:
+            raise ValueError("닉네임은 2자 이상이어야 합니다.")
+        return v.strip()
+
+    @field_validator("bio")
+    @classmethod
+    def bio_max_length(cls, v: Optional[str]) -> Optional[str]:
+        if v is None:
+            return v
+        v = v.strip()
+        if len(v) > 200:
+            raise ValueError("자기소개는 200자 이하여야 합니다.")
+        return v or None
+
+
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
