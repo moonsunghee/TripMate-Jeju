@@ -51,42 +51,6 @@
 }
 
 // ============================================================
-// Stats row
-// ============================================================
-.statsRow {
-  display: flex;
-  align-items: center;
-  background: $color-background;
-  border-bottom: 1px solid $color-border-light;
-  padding: 14px 0;
-}
-
-.statItem {
-  flex: 1;
-  @include flex-column;
-  align-items: center;
-  gap: 3px;
-}
-
-.statNum {
-  font-size: 20px;
-  font-weight: $font-weight-bold;
-  color: $color-primary;
-  line-height: 1;
-}
-
-.statLabel {
-  font-size: $font-size-xs;
-  color: $color-text-muted;
-}
-
-.statDivider {
-  width: 1px;
-  height: 28px;
-  background: $color-border;
-}
-
-// ============================================================
 // Tabs
 // ============================================================
 .tabs {

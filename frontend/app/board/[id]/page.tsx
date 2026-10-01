@@ -3,12 +3,9 @@
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import {
-  RiArrowLeftLine, RiMapPin2Line, RiRouteLine, RiCalendarLine,
-  RiHeartLine, RiHeartFill, RiTimeLine, RiCarLine, RiGroupLine,
-  RiRestaurantLine, RiCupLine, RiHome2Line, RiWalkLine,
-  RiAnchorLine, RiRunLine, RiFlag2Line,
+  RiArrowLeftLine, RiRouteLine, RiCalendarLine,
+  RiHeartLine, RiHeartFill, RiCarLine, RiGroupLine,
 } from "react-icons/ri";
-import type { IconType } from "react-icons";
 import { api, ApiError } from "@/lib/api";
 import {
   COMPANION_AGE_LABELS, COMPANION_GENDER_LABELS,
@@ -16,19 +13,8 @@ import {
 } from "@/lib/types";
 import { authStorage, type UserResponse } from "@/lib/auth";
 import KakaoMap from "@/components/KakaoMap";
+import ScheduleCard from "@/components/ScheduleCard";
 import styles from "./page.module.scss";
-
-const CATEGORY_ICONS: Record<string, IconType> = {
-  조식: RiRestaurantLine, 중식: RiRestaurantLine, 석식: RiRestaurantLine, 야식: RiRestaurantLine,
-  restaurant: RiRestaurantLine,
-  디저트: RiCupLine, 카페: RiCupLine, dessert: RiCupLine,
-  관광지: RiMapPin2Line, 관광: RiMapPin2Line, tourist: RiMapPin2Line,
-  숙소: RiHome2Line, accommodation: RiHome2Line,
-  트레킹: RiWalkLine, 등반: RiWalkLine,
-  액티비티: RiAnchorLine, 서핑: RiAnchorLine, 카약: RiAnchorLine,
-  러닝: RiRunLine, 트레일: RiRunLine,
-  골프: RiFlag2Line,
-};
 
 // course_places를 day별로 그룹화
 function groupByDay(places: CoursePlace[]): CoursePlace[][] {
@@ -277,7 +263,6 @@ export default function BoardDetailPage() {
             </p>
           )}
           {currentDay.map((item, i) => {
-            const Icon = CATEGORY_ICONS[item.category ?? ""] ?? RiMapPin2Line;
             return (
               <div key={item.id} className={styles.scheduleRow}>
                 <div className={styles.scheduleLeft}>
@@ -285,30 +270,14 @@ export default function BoardDetailPage() {
                   {i < currentDay.length - 1 && <div className={styles.scheduleConn} />}
                 </div>
                 <div className={styles.scheduleRight}>
-                  <div className={styles.scheduleCard}>
-                    <div className={styles.scheduleCardTop}>
-                      <div className={styles.scheduleCardCategory}>
-                        <Icon size={17} />
-                        <span>{item.category ?? "-"}</span>
-                      </div>
-                      <div className={styles.scheduleCardDuration}>
-                        <RiTimeLine size={13} />
-                        <span>{item.time ?? "-"}</span>
-                      </div>
-                    </div>
-                    <div className={styles.scheduleCardAddrRow}>
-                      <span className={styles.scheduleCardAddr}>{item.place_name ?? "-"}</span>
-                      <button
-                        className={styles.copyBtn}
-                        onClick={() => navigator.clipboard?.writeText(item.place_name ?? "")}
-                      >복사</button>
-                    </div>
-                    {item.memo && (
-                      <div className={styles.scheduleCardAddrRow}>
-                        <span className={styles.scheduleCardAddr}>{item.memo}</span>
-                      </div>
-                    )}
-                  </div>
+                  <ScheduleCard
+                    category={item.category}
+                    placeName={item.place_name ?? "-"}
+                    stayMinutes={item.stay_minutes}
+                    address={item.address}
+                    roadAddress={item.road_address}
+                    image={item.place_image}
+                  />
                   {i < currentDay.length - 1 && (
                     <div className={styles.transportRow}>
                       <RiCarLine size={15} />

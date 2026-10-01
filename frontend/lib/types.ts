@@ -12,6 +12,7 @@ export interface Place {
   category: string;
   region: string | null;
   address: string | null;
+  road_address: string | null;
   phone_number: string | null;
   place_image: string | null;
   latitude: number | null;
@@ -29,6 +30,9 @@ export interface CoursePlace {
   place_name: string | null;
   category: string | null;
   time: string | null;
+  stay_minutes: number | null;
+  address: string | null;
+  road_address: string | null;
   memo: string | null;
   place_image: string | null;
 }
@@ -98,7 +102,10 @@ export interface GeneratedPlace {
   place_name: string;
   category: string;
   time: string | null;
+  stay_minutes: number | null;
   memo: string | null;
+  address: string | null;
+  road_address: string | null;
 }
 
 export interface GeneratedCourse {

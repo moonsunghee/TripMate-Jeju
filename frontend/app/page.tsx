@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
-  RiBellLine, RiArrowRightSLine, RiUser3Line,
+  RiBellLine, RiArrowRightSLine, RiSearchLine, RiEqualizerLine,
   RiHeartLine, RiMapPinLine, RiCalendarLine,
 } from "react-icons/ri";
 import { api } from "@/lib/api";
@@ -73,6 +73,77 @@ function CourseSection({ title, moreHref, emptyText, courses, hrefOf }: {
   );
 }
 
+function RecommendedCarousel({ courses }: { courses: Course[] }) {
+  const trackRef = useRef<HTMLDivElement>(null);
+  const [active, setActive] = useState(0);
+
+  const handleScroll = () => {
+    const track = trackRef.current;
+    if (!track) return;
+    setActive(Math.round(track.scrollLeft / track.clientWidth));
+  };
+
+  const goTo = (index: number) => {
+    const track = trackRef.current;
+    track?.scrollTo({ left: index * track.clientWidth, behavior: "smooth" });
+  };
+
+  return (
+    <section className={styles.section}>
+      <div className={styles.sectionHead}>
+        <h2 className={styles.sectionTitle}>추천코스</h2>
+        <Link href="/board" className={styles.sectionMore}>
+          더보기 <RiArrowRightSLine size={16} />
+        </Link>
+      </div>
+      {courses.length === 0 ? (
+        <p className={styles.emptyHint}>추천할 코스가 없습니다</p>
+      ) : (
+        <>
+          <div ref={trackRef} className={styles.carousel} onScroll={handleScroll}>
+            {courses.map((course) => {
+              const color = getColor(course.travel_style);
+              return (
+                <Link key={course.id} href={`/board/c${course.id}`} className={styles.slide}>
+                  <div className={styles.slideThumb} style={{ background: `linear-gradient(135deg, ${color}cc, ${color})` }}>
+                    <span className={`${styles.slideBadge} ${course.is_recruiting ? styles.slideBadgeRecruiting : ""}`}>
+                      {course.is_recruiting ? "모집코스" : "공유코스"}
+                    </span>
+                    {course.travel_style && <span className={styles.courseCardTag}>{course.travel_style}</span>}
+                  </div>
+                  <div className={styles.slideBody}>
+                    <p className={styles.slideTitle}>{course.title}</p>
+                    <div className={styles.slideMeta}>
+                      <span><RiMapPinLine size={12} /> {course.region ?? "-"}</span>
+                      <span><RiCalendarLine size={12} /> {course.duration_days ? `${course.duration_days}일` : "-"}</span>
+                    </div>
+                    <div className={styles.courseCardFoot}>
+                      <span className={styles.courseCardAuthor}>by {course.user?.nickname ?? "-"}</span>
+                      <span className={styles.courseCardLikes}><RiHeartLine size={12} /> {course.like_count}</span>
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+          {courses.length > 1 && (
+            <div className={styles.dots}>
+              {courses.map((course, i) => (
+                <button
+                  key={course.id}
+                  className={`${styles.dot} ${i === active ? styles.dotActive : ""}`}
+                  onClick={() => goTo(i)}
+                  aria-label={`${i + 1}번째 코스`}
+                />
+              ))}
+            </div>
+          )}
+        </>
+      )}
+    </section>
+  );
+}
+
 // ============================================================
 // Page
 // ============================================================
@@ -81,12 +152,12 @@ export default function HomePage() {
   const [user, setUser] = useState<UserResponse | null>(null);
   const [recommendedCourses, setRecommendedCourses] = useState<Course[]>([]);
   const [myCourses, setMyCourses] = useState<Course[]>([]);
+  const [query, setQuery] = useState("");
 
   useEffect(() => {
     api.get<UserResponse>("/api/auth/me")
       .then((u) => {
         setUser(u);
-        // 내 코스 통계
         api.get<Course[]>("/api/courses/my").then(setMyCourses).catch(() => {});
         api.get<Course[]>("/api/courses/recommended?size=5").then(setRecommendedCourses).catch(() => {});
       })
@@ -102,62 +173,52 @@ export default function HomePage() {
   }, [router]);
 
   const initial = user?.nickname?.[0]?.toUpperCase() ?? "?";
-  const totalCount = myCourses.length;
   const myRecruiting = myCourses.filter((c) => c.is_recruiting);
   const mySharing = myCourses.filter((c) => c.is_shared && !c.is_recruiting);
 
+  const handleSearch = (e: FormEvent) => {
+    e.preventDefault();
+    const q = query.trim();
+    router.push(q ? `/board?q=${encodeURIComponent(q)}` : "/board");
+  };
+
   return (
     <div className={styles.page}>
-      {/* Header */}
-      <div className={styles.header}>
-        <span className={styles.headerLogo}>TripMate Jeju</span>
-        <div className={styles.headerActions}>
-          <button className={styles.bellBtn}>
-            <RiBellLine size={22} />
-            <span className={styles.bellDot} />
-          </button>
-          <Link href="/my-page" className={styles.bellBtn} aria-label="마이페이지">
-            <RiUser3Line size={22} />
+      <div className={styles.hero}>
+        <div className={styles.heroTop}>
+          <div className={styles.heroText}>
+            <p className={styles.greeting}>안녕하세요, {user?.nickname ?? "..."}님 👋</p>
+            <h1 className={styles.headline}>어디로 떠나볼까요?</h1>
+          </div>
+          <div className={styles.heroActions}>
+            <button className={styles.bellBtn} aria-label="알림">
+              <RiBellLine size={22} />
+              <span className={styles.bellDot} />
+            </button>
+            <Link href="/my-page" className={styles.avatar} aria-label="마이페이지">
+              {initial}
+            </Link>
+          </div>
+        </div>
+
+        <div className={styles.searchRow}>
+          <form className={styles.searchBox} onSubmit={handleSearch}>
+            <RiSearchLine size={18} className={styles.searchIcon} />
+            <input
+              className={styles.searchInput}
+              placeholder="코스 제목, 태그 검색"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              enterKeyHint="search"
+            />
+          </form>
+          <Link href="/board" className={styles.filterBtn} aria-label="게시판 필터">
+            <RiEqualizerLine size={20} />
           </Link>
         </div>
       </div>
 
-      {/* Profile card */}
-      <div className={styles.profileCard}>
-        <Link href="/my-page" className={styles.profileLeft}>
-          <div className={styles.avatar}>{initial}</div>
-          <div className={styles.profileInfo}>
-            <p className={styles.greeting}>안녕하세요 👋</p>
-            <p className={styles.nickname}>{user?.nickname ?? "..."}님</p>
-            <p className={styles.email}>{user?.email ?? ""}</p>
-          </div>
-          <RiArrowRightSLine size={20} className={styles.profileArrow} />
-        </Link>
-        <div className={styles.statsRow}>
-          <div className={styles.statItem}>
-            <span className={styles.statNum}>{totalCount}</span>
-            <span className={styles.statLabel}>내 코스</span>
-          </div>
-          <div className={styles.statDivider} />
-          <div className={styles.statItem}>
-            <span className={styles.statNum}>{mySharing.length}</span>
-            <span className={styles.statLabel}>공유코스</span>
-          </div>
-          <div className={styles.statDivider} />
-          <div className={styles.statItem}>
-            <span className={styles.statNum}>{myRecruiting.length}</span>
-            <span className={styles.statLabel}>모집중</span>
-          </div>
-        </div>
-      </div>
-
-      <CourseSection
-        title="공유중인 추천코스"
-        moreHref="/board"
-        emptyText="추천할 코스가 없습니다"
-        courses={recommendedCourses}
-        hrefOf={(c) => `/board/c${c.id}`}
-      />
+      <RecommendedCarousel courses={recommendedCourses} />
       <CourseSection
         title="동행모집중"
         moreHref="/my-courses"

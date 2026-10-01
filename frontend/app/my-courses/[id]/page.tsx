@@ -3,34 +3,17 @@
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import {
-  RiArrowLeftLine, RiMapPin2Line, RiRouteLine, RiCalendarLine,
-  RiHeartLine, RiTimeLine, RiCarLine, RiGroupLine,
-  RiRestaurantLine, RiCupLine, RiHome2Line, RiWalkLine,
-  RiAnchorLine, RiRunLine, RiFlag2Line, RiEditLine, RiShareLine, RiDeleteBinLine,
-  RiImageLine, RiCheckboxBlankCircleLine,
+  RiArrowLeftLine, RiRouteLine, RiCalendarLine, RiHeartLine, RiCarLine, RiGroupLine,
+  RiEditLine, RiShareLine, RiDeleteBinLine,
 } from "react-icons/ri";
-import type { IconType } from "react-icons";
 import { api, ApiError } from "@/lib/api";
 import type { Course, CoursePlace, Place } from "@/lib/types";
 import KakaoMap from "@/components/KakaoMap";
 import PlaceDetailSheet, { type PlaceDetailData } from "@/components/ui/PlaceDetailSheet";
 import PlaceEditSheet from "@/components/ui/PlaceEditSheet";
 import ShareSheet from "@/components/ShareSheet";
+import ScheduleCard, { PLACE_OPTIONS } from "@/components/ScheduleCard";
 import styles from "./page.module.scss";
-
-const CATEGORY_ICONS: Record<string, IconType> = {
-  조식: RiRestaurantLine, 중식: RiRestaurantLine, 석식: RiRestaurantLine, 야식: RiRestaurantLine,
-  restaurant: RiRestaurantLine,
-  디저트: RiCupLine, 카페: RiCupLine, dessert: RiCupLine,
-  관광지: RiMapPin2Line, 관광: RiMapPin2Line, tourist: RiMapPin2Line,
-  숙소: RiHome2Line, accommodation: RiHome2Line,
-  트레킹: RiWalkLine, 등반: RiWalkLine,
-  액티비티: RiAnchorLine, 서핑: RiAnchorLine, 카약: RiAnchorLine,
-  러닝: RiRunLine, 트레일: RiRunLine,
-  골프: RiFlag2Line,
-};
-
-const PLACE_OPTIONS = ["주차", "포장", "예약", "24시간", "반려동반", "화장실"];
 
 const STATUS_LABEL: Record<string, string> = {
   master: "나만보기", sharing: "공유코스",
@@ -67,8 +50,9 @@ export default function MyCourseDetailPage() {
       time: item.time,
       placeName: item.place_name ?? "-",
       memo: item.memo,
+      address: item.road_address ?? item.address,
       image: item.place_image,
-      options: PLACE_OPTIONS,
+      options: PLACE_OPTIONS.map((o) => o.label),
     });
     if (item.place_id) {
       api.get<Place>(`/api/places/${item.place_id}`)
@@ -96,6 +80,9 @@ export default function MyCourseDetailPage() {
     place_name: p.place_name,
     category: p.category,
     time: p.time,
+    stay_minutes: p.stay_minutes,
+    address: p.address,
+    road_address: p.road_address,
     memo: p.memo,
   });
 
@@ -113,7 +100,14 @@ export default function MyCourseDetailPage() {
     if (!course || selectedPlaceId == null) return;
     const places = course.course_places.map((p) =>
       p.id === selectedPlaceId
-        ? { ...toPlacePayload(p), place_id: place.id, place_name: place.place_name, category: place.category }
+        ? {
+            ...toPlacePayload(p),
+            place_id: place.id,
+            place_name: place.place_name,
+            category: place.category,
+            address: place.address,
+            road_address: place.road_address,
+          }
         : toPlacePayload(p)
     );
     const updated = await api.put<Course>(`/api/courses/${course.id}`, { places });
@@ -259,7 +253,6 @@ export default function MyCourseDetailPage() {
             <p style={{ color: "#868e96", textAlign: "center", padding: "1rem" }}>일정이 없습니다</p>
           )}
           {currentDay.map((item, i) => {
-            const Icon = CATEGORY_ICONS[item.category ?? ""] ?? RiMapPin2Line;
             return (
               <div key={item.id} className={styles.scheduleRow}>
                 <div className={styles.scheduleLeft}>
@@ -268,53 +261,15 @@ export default function MyCourseDetailPage() {
                 </div>
 
                 <div className={styles.scheduleRight}>
-                  <div className={styles.scheduleCard} onClick={() => openPlaceDetail(item)}>
-                    <div className={styles.scheduleCardTop}>
-                      <div className={styles.scheduleCardCategory}>
-                        <Icon size={17} />
-                        <span>{item.category ?? "-"}</span>
-                      </div>
-                      <div className={styles.scheduleCardDuration}>
-                        <RiTimeLine size={13} />
-                        <span>{item.time ?? "-"}</span>
-                      </div>
-                    </div>
-                    <div className={styles.scheduleCardMain}>
-                      <div className={styles.scheduleCardThumb}>
-                        {item.place_image ? (
-                          <img src={item.place_image} alt={item.place_name ?? ""} className={styles.scheduleCardThumbImg} />
-                        ) : (
-                          <RiImageLine size={22} className={styles.scheduleCardThumbIcon} />
-                        )}
-                      </div>
-                      <div className={styles.scheduleCardBody}>
-                        <div className={styles.scheduleCardAddrRow}>
-                          <span className={styles.scheduleCardAddr}>{item.place_name ?? "-"}</span>
-                          <button
-                            className={styles.copyBtn}
-                            onClick={(e) => { e.stopPropagation(); navigator.clipboard?.writeText(item.place_name ?? ""); }}
-                          >복사</button>
-                        </div>
-                        {item.memo && (
-                          <div className={styles.scheduleCardAddrRow}>
-                            <span className={styles.scheduleCardAddr}>{item.memo}</span>
-                            <button
-                              className={styles.copyBtn}
-                              onClick={(e) => { e.stopPropagation(); navigator.clipboard?.writeText(item.memo ?? ""); }}
-                            >복사</button>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                    <div className={styles.scheduleCardOptions}>
-                      {PLACE_OPTIONS.map((option) => (
-                        <div key={option} className={styles.optionItem}>
-                          <RiCheckboxBlankCircleLine size={14} />
-                          <span>{option}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+                  <ScheduleCard
+                    category={item.category}
+                    placeName={item.place_name ?? "-"}
+                    stayMinutes={item.stay_minutes}
+                    address={item.address}
+                    roadAddress={item.road_address}
+                    image={item.place_image}
+                    onClick={() => openPlaceDetail(item)}
+                  />
 
                   {i < currentDay.length - 1 && (
                     <div className={styles.transportRow}>
