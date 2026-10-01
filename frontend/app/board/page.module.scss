@@ -199,6 +199,11 @@
   color: #1971C2;
 }
 
+.badgeClosed {
+  background: rgba($color-badge-closed, 0.15);
+  color: $color-badge-closed;
+}
+
 .recruitCount {
   display: inline-flex;
   align-items: center;

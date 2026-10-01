@@ -11,8 +11,8 @@ import { api } from "@/lib/api";
 import type { Course, CompanionPost } from "@/lib/types";
 import styles from "./page.module.scss";
 
-type PostType = "shared" | "recruiting";
-type TabType = "all" | "shared" | "recruiting";
+type PostType = "shared" | "recruiting" | "closed";
+type TabType = "all" | PostType;
 type SortType = "latest" | "popular";
 
 interface UnifiedPost {
@@ -29,8 +29,15 @@ interface UnifiedPost {
   cardColor: string;
   current?: number;
   max?: number;
-  closed?: boolean;
 }
+
+const POST_TYPE_LABEL: Record<PostType, string> = {
+  shared: "공유코스",
+  recruiting: "모집코스",
+  closed: "모집완료",
+};
+
+const TABS: TabType[] = ["all", "shared", "recruiting", "closed"];
 
 const STYLE_COLORS: Record<string, string> = {
   휴양: "#52B788", 등산: "#2D6A4F", 해양레포츠: "#1971C2", "트레일/러닝": "#E67700",
@@ -58,7 +65,7 @@ function courseToPost(c: Course): UnifiedPost {
 function companionToPost(p: CompanionPost): UnifiedPost {
   return {
     id: `p${p.id}`,
-    type: "recruiting",
+    type: p.status === "completed" ? "closed" : "recruiting",
     title: p.title,
     author: p.user?.nickname ?? "-",
     tags: [],
@@ -72,11 +79,16 @@ function companionToPost(p: CompanionPost): UnifiedPost {
     cardColor: "#2D6A4F",
     current: p.current_people,
     max: p.max_people,
-    closed: p.status === "completed",
   };
 }
 
 const PAGE_SIZE = 6;
+
+const BADGE_CLASS: Record<PostType, string> = {
+  shared: styles.badgeShared,
+  recruiting: styles.badgeRecruiting,
+  closed: styles.badgeClosed,
+};
 
 export default function BoardPage() {
   const router = useRouter();
@@ -107,8 +119,7 @@ export default function BoardPage() {
 
   const filtered = useMemo(() => {
     let list = allPosts;
-    if (tab === "shared") list = list.filter((p) => p.type === "shared");
-    if (tab === "recruiting") list = list.filter((p) => p.type === "recruiting");
+    if (tab !== "all") list = list.filter((p) => p.type === tab);
     if (search.trim()) {
       const q = search.trim().toLowerCase();
       list = list.filter(
@@ -144,13 +155,13 @@ export default function BoardPage() {
 
       <div className={styles.filterBar}>
         <div className={styles.tabs}>
-          {(["all", "shared", "recruiting"] as TabType[]).map((t) => (
+          {TABS.map((t) => (
             <button
               key={t}
               className={`${styles.tab} ${tab === t ? styles.tabActive : ""}`}
               onClick={() => handleTabChange(t)}
             >
-              {t === "all" ? "전체" : t === "shared" ? "공유코스" : "모집중"}
+              {t === "all" ? "전체" : POST_TYPE_LABEL[t]}
             </button>
           ))}
         </div>
@@ -181,10 +192,10 @@ export default function BoardPage() {
             <div className={styles.cardAccent} style={{ background: post.cardColor }} />
             <div className={styles.cardContent}>
               <div className={styles.cardTop}>
-                <span className={`${styles.statusBadge} ${post.type === "shared" ? styles.badgeShared : styles.badgeRecruiting}`}>
-                  {post.type === "shared" ? "공유코스" : post.closed ? "모집마감" : "모집중"}
+                <span className={`${styles.statusBadge} ${BADGE_CLASS[post.type]}`}>
+                  {POST_TYPE_LABEL[post.type]}
                 </span>
-                {post.type === "recruiting" && (
+                {post.type !== "shared" && (
                   <span className={styles.recruitCount}>
                     <RiGroupLine size={12} /> {post.current}/{post.max}명
                   </span>
