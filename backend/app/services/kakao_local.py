@@ -60,7 +60,8 @@ async def search_place(
         doc = documents[0]
         return {
             "place_name":   doc.get("place_name"),
-            "address":      doc.get("road_address_name") or doc.get("address_name"),
+            "address":      doc.get("address_name"),
+            "road_address": doc.get("road_address_name") or None,
             "phone_number": doc.get("phone"),
             "latitude":     float(doc["y"]) if doc.get("y") else None,
             "longitude":    float(doc["x"]) if doc.get("x") else None,
@@ -94,6 +95,55 @@ async def search_places_by_category(
 
     try:
         async with httpx.AsyncClient(timeout=10.0) as client:
+            resp = await client.get(url, params=params, headers=headers)
+            resp.raise_for_status()
+            return resp.json().get("documents", [])
+    except Exception:
+        return []
+
+
+async def find_coordinates(query: str) -> Optional[tuple]:
+    """카테고리 필터 없이 키워드로 검색해 첫 결과의 (경도 x, 위도 y)를 반환."""
+    if not settings.KAKAO_REST_API_KEY:
+        return None
+
+    headers = {"Authorization": f"KakaoAK {settings.KAKAO_REST_API_KEY}"}
+    try:
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            resp = await client.get(KAKAO_LOCAL_URL, params={"query": query, "size": 1}, headers=headers)
+            resp.raise_for_status()
+            documents = resp.json().get("documents", [])
+    except Exception:
+        return None
+
+    if not documents:
+        return None
+    return float(documents[0]["x"]), float(documents[0]["y"])
+
+
+async def search_nearby(
+    category_code: str,
+    x: float,
+    y: float,
+    radius: int,
+    size: int = 15,
+) -> list:
+    """좌표 주변 반경(m) 안의 업종 검색. 카카오 정확도순 결과 문서 목록."""
+    if not settings.KAKAO_REST_API_KEY:
+        return []
+
+    url = "https://dapi.kakao.com/v2/local/search/category.json"
+    params = {
+        "category_group_code": category_code,
+        "x": x,
+        "y": y,
+        "radius": radius,
+        "size": size,
+        "sort": "accuracy",
+    }
+    headers = {"Authorization": f"KakaoAK {settings.KAKAO_REST_API_KEY}"}
+    try:
+        async with httpx.AsyncClient(timeout=5.0) as client:
             resp = await client.get(url, params=params, headers=headers)
             resp.raise_for_status()
             return resp.json().get("documents", [])

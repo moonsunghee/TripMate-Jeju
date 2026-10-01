@@ -270,6 +270,8 @@ def complete_recruiting(
         raise HTTPException(status_code=400, detail="이미 모집이 완료된 게시글입니다.")
 
     post.status = "completed"
+    if post.course:
+        post.course.status = "completed"
 
     # 채팅방이 없으면 자동 생성
     if not post.chat_room:

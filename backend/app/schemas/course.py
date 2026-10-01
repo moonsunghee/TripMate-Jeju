@@ -1,7 +1,7 @@
 from datetime import date, datetime
 from typing import List, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 # ── CoursePlace ────────────────────────────────────────────────────────────────
@@ -13,6 +13,9 @@ class CoursePlaceCreate(BaseModel):
     place_name: Optional[str] = None
     category: Optional[str] = None
     time: Optional[str] = None
+    stay_minutes: Optional[int] = Field(None, ge=0, le=1440)
+    address: Optional[str] = None
+    road_address: Optional[str] = None
     memo: Optional[str] = None
 
 
@@ -24,6 +27,9 @@ class CoursePlaceResponse(BaseModel):
     place_name: Optional[str]
     category: Optional[str]
     time: Optional[str]
+    stay_minutes: Optional[int] = None
+    address: Optional[str] = Field(None, validation_alias="display_address")
+    road_address: Optional[str] = Field(None, validation_alias="display_road_address")
     memo: Optional[str]
     place_image: Optional[str] = None
 
@@ -141,12 +147,14 @@ class GeneratedPlaceItem(BaseModel):
     place_name: str
     category: str
     time: Optional[str] = None
+    stay_minutes: Optional[int] = None
     memo: Optional[str] = None
 
 
 class EnrichedPlaceItem(GeneratedPlaceItem):
     """AI 생성 장소 + 카카오/TourAPI에서 보강된 실제 업체 정보"""
     address: Optional[str] = None
+    road_address: Optional[str] = None
     phone_number: Optional[str] = None
     latitude: Optional[float] = None
     longitude: Optional[float] = None

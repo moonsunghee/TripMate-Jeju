@@ -9,6 +9,7 @@ class PlaceCreate(BaseModel):
     category: str
     region: Optional[str] = None
     address: Optional[str] = None
+    road_address: Optional[str] = None
     phone_number: Optional[str] = None
     place_image: Optional[str] = None
     latitude: Optional[float] = None
@@ -21,6 +22,7 @@ class PlaceUpdate(BaseModel):
     category: Optional[str] = None
     region: Optional[str] = None
     address: Optional[str] = None
+    road_address: Optional[str] = None
     phone_number: Optional[str] = None
     place_image: Optional[str] = None
     latitude: Optional[float] = None
@@ -34,6 +36,7 @@ class PlaceResponse(BaseModel):
     category: str
     region: Optional[str]
     address: Optional[str]
+    road_address: Optional[str] = None
     phone_number: Optional[str]
     place_image: Optional[str]
     latitude: Optional[float]
