@@ -19,11 +19,11 @@ const TABS = [
   { key: "all" as TabKey, label: "전체" },
   { key: "private" as TabKey, label: "나만보기" },
   { key: "sharing" as TabKey, label: "공유코스" },
-  { key: "recruiting" as TabKey, label: "모집중" },
+  { key: "recruiting" as TabKey, label: "모집코스" },
 ];
 
 const STATUS_LABEL: Record<string, string> = {
-  master: "나만보기", sharing: "공유코스", recruiting: "모집중",
+  master: "나만보기", sharing: "공유코스", recruiting: "모집코스",
   completed: "모집마감", discarded: "폐기됨",
 };
 
@@ -85,29 +85,6 @@ export default function MyCoursesPage() {
           <RiAddLine size={20} />
           <span>새 코스</span>
         </button>
-      </div>
-
-      {/* Stats */}
-      <div className={styles.statsRow}>
-        <div className={styles.statItem}>
-          <span className={styles.statNum}>{counts.all}</span>
-          <span className={styles.statLabel}>전체</span>
-        </div>
-        <div className={styles.statDivider} />
-        <div className={styles.statItem}>
-          <span className={styles.statNum}>{counts.private}</span>
-          <span className={styles.statLabel}>나만보기</span>
-        </div>
-        <div className={styles.statDivider} />
-        <div className={styles.statItem}>
-          <span className={styles.statNum}>{counts.sharing}</span>
-          <span className={styles.statLabel}>공유코스</span>
-        </div>
-        <div className={styles.statDivider} />
-        <div className={styles.statItem}>
-          <span className={styles.statNum}>{counts.recruiting}</span>
-          <span className={styles.statLabel}>모집중</span>
-        </div>
       </div>
 
       {/* Tabs */}
@@ -173,7 +150,7 @@ export default function MyCoursesPage() {
                   </span>
                   {course.is_recruiting && (
                     <span className={styles.recruitCount}>
-                      <RiGroupLine size={11} /> 모집중
+                      <RiGroupLine size={11} /> 모집코스
                     </span>
                   )}
                   <div className={styles.moreWrap} onClick={(e) => e.stopPropagation()}>

@@ -9,14 +9,13 @@ import {
   RiSunLine, RiCompass3Line, RiAnchorLine, RiRunLine, RiWalkLine,
   RiHeartPulseLine, RiFlag2Line, RiDropLine, RiBikeLine,
   RiUserSmileLine, RiGroupLine,
-  RiRestaurantLine, RiCupLine, RiMapPin2Line, RiHome2Line,
-  RiCarLine, RiHeartLine, RiRouteLine, RiCalendarLine, RiTimeLine,
-  RiImageLine, RiCheckboxBlankCircleLine,
+  RiCarLine, RiHeartLine, RiRouteLine, RiCalendarLine,
 } from "react-icons/ri";
 import type { IconType } from "react-icons";
 import JejuMap from "@/components/ui/JejuMap";
 import KakaoMap from "@/components/KakaoMap";
 import VisibilityPicker, { type CourseVisibility } from "@/components/VisibilityPicker";
+import ScheduleCard, { PLACE_OPTIONS } from "@/components/ScheduleCard";
 import BottomNav from "@/components/layout/BottomNav";
 import PlaceDetailSheet, { type PlaceDetailData } from "@/components/ui/PlaceDetailSheet";
 import PlaceEditSheet from "@/components/ui/PlaceEditSheet";
@@ -90,18 +89,6 @@ const CATEGORY_COLORS: Record<string, string> = {
   조식: "#E67700", 중식: "#1971C2", 석식: "#C92A2A",
   디저트: "#862E9C", 관광지: "#2D6A4F", 숙소: "#495057", 야식: "#D9480F",
 };
-
-const CATEGORY_ICONS: Record<string, IconType> = {
-  조식: RiRestaurantLine,
-  중식: RiRestaurantLine,
-  석식: RiRestaurantLine,
-  야식: RiRestaurantLine,
-  디저트: RiCupLine,
-  관광지: RiMapPin2Line,
-  숙소: RiHome2Line,
-};
-
-const PLACE_OPTIONS = ["주차", "포장", "예약", "24시간", "반려동반", "화장실"];
 
 const MOCK_COURSES = [
   {
@@ -226,11 +213,20 @@ type StepProps = {
 type ScheduleItem = {
   category: string;
   place: string;
-  duration: string;
-  address: string;
+  time: string | null;
+  stayMinutes: number | null;
+  address: string | null;
+  roadAddress: string | null;
+  memo: string | null;
   image?: string;
   placeId?: number;
 };
+
+// 샘플 코스의 "1.5시간" 같은 체류 시간 문자열을 분으로 변환
+function parseStay(text: string): number | null {
+  const hours = parseFloat(text);
+  return Number.isFinite(hours) ? Math.round(hours * 60) : null;
+}
 
 function isAICourse(form: DesignFormData, generatedCourse: GeneratedCourse | null): generatedCourse is GeneratedCourse {
   return form.selectedCourseIndex === 0 && !!generatedCourse;
@@ -247,13 +243,24 @@ function buildInitialDays(form: DesignFormData, generatedCourse: GeneratedCourse
       map.get(d)!.sort((a, b) => a.visit_order - b.visit_order).map((p) => ({
         category: p.category,
         place: p.place_name,
-        duration: p.time ?? "-",
-        address: p.memo ?? "",
+        time: p.time,
+        stayMinutes: p.stay_minutes,
+        address: p.address,
+        roadAddress: p.road_address,
+        memo: p.memo,
       }))
     );
   }
   const course = form.selectedCourseIndex !== null ? MOCK_COURSES[form.selectedCourseIndex] : null;
-  return course?.days.map((d) => d.items) ?? [];
+  return course?.days.map((d) => d.items.map((item) => ({
+    category: item.category,
+    place: item.place,
+    time: null,
+    stayMinutes: parseStay(item.duration),
+    address: item.address,
+    roadAddress: null,
+    memo: null,
+  }))) ?? [];
 }
 
 // ============================================================
@@ -340,8 +347,11 @@ export default function DesignPage() {
           category: item.category,
           day: di + 1,
           visit_order: ii + 1,
-          time: useAI && item.duration !== "-" ? item.duration : null,
-          memo: item.address || null,
+          time: item.time,
+          stay_minutes: item.stayMinutes,
+          address: item.address,
+          road_address: item.roadAddress,
+          memo: item.memo,
         }))
       );
 
@@ -777,11 +787,12 @@ function CourseDetailStep({ form, generatedCourse, days: editableDays, onChangeD
   const activePlace = activeItem ? editableDays[activeItem.dayIndex]?.[activeItem.itemIndex] ?? null : null;
   const activeData: PlaceDetailData | null = activePlace ? {
     category: activePlace.category,
-    time: activePlace.duration,
+    time: activePlace.time,
     placeName: activePlace.place,
-    address: activePlace.address,
+    address: activePlace.roadAddress ?? activePlace.address ?? undefined,
+    memo: activePlace.memo,
     image: activePlace.image,
-    options: PLACE_OPTIONS,
+    options: PLACE_OPTIONS.map((o) => o.label),
   } : null;
 
   const closeSheets = () => {
@@ -802,7 +813,14 @@ function CourseDetailStep({ form, generatedCourse, days: editableDays, onChangeD
     onChangeDays(editableDays.map((day, di) =>
       di === activeItem.dayIndex
         ? day.map((it, ii) => ii === activeItem.itemIndex
-          ? { ...it, place: place.place_name, address: place.address ?? "", image: place.place_image ?? undefined, placeId: place.id }
+          ? {
+            ...it,
+            place: place.place_name,
+            address: place.address,
+            roadAddress: place.road_address,
+            image: place.place_image ?? undefined,
+            placeId: place.id,
+          }
           : it)
         : day
     ));
@@ -854,7 +872,10 @@ function CourseDetailStep({ form, generatedCourse, days: editableDays, onChangeD
               <button
                 key={day}
                 className={`${styles.dayTab} ${activeDay === day ? styles.dayTabActive : ""}`}
-                onClick={() => setActiveDay(day)}
+                onClick={(e) => {
+                  setActiveDay(day);
+                  e.currentTarget.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+                }}
               >
                 {day}일
               </button>
@@ -866,7 +887,6 @@ function CourseDetailStep({ form, generatedCourse, days: editableDays, onChangeD
       {/* Schedule */}
       <div className={styles.scheduleSection}>
         {items.map((item, i) => {
-          const Icon = CATEGORY_ICONS[item.category];
           return (
             <div key={i} className={styles.scheduleRow}>
               {/* Left: number + connector line */}
@@ -877,54 +897,15 @@ function CourseDetailStep({ form, generatedCourse, days: editableDays, onChangeD
 
               {/* Right: card + transport */}
               <div className={styles.scheduleRight}>
-                <div
-                  className={styles.scheduleCard}
+                <ScheduleCard
+                  category={item.category}
+                  placeName={item.place}
+                  stayMinutes={item.stayMinutes}
+                  address={item.address}
+                  roadAddress={item.roadAddress}
+                  image={item.image}
                   onClick={() => { setActiveItem({ dayIndex: activeDay - 1, itemIndex: i }); setSheetMode("view"); }}
-                >
-                  <div className={styles.scheduleCardTop}>
-                    <div className={styles.scheduleCardCategory}>
-                      {Icon && <Icon size={17} />}
-                      <span>{item.category}</span>
-                    </div>
-                    <div className={styles.scheduleCardDuration}>
-                      <RiTimeLine size={13} />
-                      <span>{item.duration}</span>
-                    </div>
-                  </div>
-                  <div className={styles.scheduleCardMain}>
-                    <div className={styles.scheduleCardThumb}>
-                      {item.image ? (
-                        <img src={item.image} alt={item.place} className={styles.scheduleCardThumbImg} />
-                      ) : (
-                        <RiImageLine size={22} className={styles.scheduleCardThumbIcon} />
-                      )}
-                    </div>
-                    <div className={styles.scheduleCardBody}>
-                      <div className={styles.scheduleCardAddrRow}>
-                        <span className={styles.scheduleCardAddr}>{item.place}</span>
-                        <button
-                          className={styles.copyBtn}
-                          onClick={(e) => { e.stopPropagation(); navigator.clipboard?.writeText(item.place); }}
-                        >복사</button>
-                      </div>
-                      <div className={styles.scheduleCardAddrRow}>
-                        <span className={styles.scheduleCardAddr}>{item.address}</span>
-                        <button
-                          className={styles.copyBtn}
-                          onClick={(e) => { e.stopPropagation(); navigator.clipboard?.writeText(item.address); }}
-                        >복사</button>
-                      </div>
-                    </div>
-                  </div>
-                  <div className={styles.scheduleCardOptions}>
-                    {PLACE_OPTIONS.map((option) => (
-                      <div key={option} className={styles.optionItem}>
-                        <RiCheckboxBlankCircleLine size={14} />
-                        <span>{option}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                />
                 {i < items.length - 1 && (
                   <div className={styles.transportRow}>
                     <RiCarLine size={15} />

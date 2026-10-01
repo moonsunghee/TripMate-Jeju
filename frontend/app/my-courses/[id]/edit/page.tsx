@@ -8,6 +8,7 @@ import {
 import { api, ApiError } from "@/lib/api";
 import type { Course } from "@/lib/types";
 import VisibilityPicker, { type CourseVisibility } from "@/components/VisibilityPicker";
+import { formatStay } from "@/components/ScheduleCard";
 import styles from "./page.module.scss";
 
 const PLACE_CATEGORIES: [string, string][] = [
@@ -18,12 +19,17 @@ const PLACE_CATEGORIES: [string, string][] = [
   ["nightfood", "야식"],
 ];
 
+const STAY_OPTIONS = [30, 60, 90, 120, 150, 180, 240, 300, 360, 480, 600, 720];
+
 interface EditPlace {
   key: number;
   place_id: number | null;
   place_name: string;
   category: string;
   time: string;
+  stay_minutes: number | null;
+  address: string | null;
+  road_address: string | null;
   memo: string;
 }
 
@@ -46,6 +52,9 @@ function toForm(course: Course, nextKey: () => number): EditForm {
         place_name: p.place_name ?? "",
         category: p.category ?? "tourist",
         time: p.time ?? "",
+        stay_minutes: p.stay_minutes,
+        address: p.address,
+        road_address: p.road_address,
         memo: p.memo ?? "",
       });
     });
@@ -99,7 +108,10 @@ export default function CourseEditPage() {
 
   const addPlace = () =>
     updateDays((days) => days.map((day, di) => (di === activeDay
-      ? [...day, { key: nextKey(), place_id: null, place_name: "", category: "tourist", time: "", memo: "" }]
+      ? [...day, {
+        key: nextKey(), place_id: null, place_name: "", category: "tourist", time: "",
+        stay_minutes: null, address: null, road_address: null, memo: "",
+      }]
       : day)));
 
   const addDay = () => {
@@ -131,6 +143,9 @@ export default function CourseEditPage() {
       place_name: p.place_name.trim(),
       category: p.category,
       time: p.time || null,
+      stay_minutes: p.stay_minutes,
+      address: p.address,
+      road_address: p.road_address,
       memo: p.memo.trim() || null,
       day: di + 1,
       visit_order: i + 1,
@@ -241,13 +256,6 @@ export default function CourseEditPage() {
                       )}
                       {PLACE_CATEGORIES.map(([v, label]) => <option key={v} value={v}>{label}</option>)}
                     </select>
-                    <input
-                      type="time"
-                      className={styles.timeInput}
-                      value={p.time}
-                      onChange={(e) => updatePlace(i, { time: e.target.value })}
-                      aria-label="방문 시간"
-                    />
                     <div className={styles.placeActions}>
                       <button type="button" onClick={() => movePlace(i, -1)} disabled={i === 0} aria-label="위로">
                         <RiArrowUpLine size={16} />
@@ -264,8 +272,31 @@ export default function CourseEditPage() {
                     className={styles.input}
                     value={p.place_name}
                     placeholder="장소 이름"
-                    onChange={(e) => updatePlace(i, { place_name: e.target.value, place_id: null })}
+                    onChange={(e) => updatePlace(i, {
+                      place_name: e.target.value, place_id: null, address: null, road_address: null,
+                    })}
                   />
+                  <div className={styles.placeRow}>
+                    <input
+                      type="time"
+                      className={styles.timeInput}
+                      value={p.time}
+                      onChange={(e) => updatePlace(i, { time: e.target.value })}
+                      aria-label="방문 시각"
+                    />
+                    <select
+                      className={styles.select}
+                      value={p.stay_minutes ?? ""}
+                      onChange={(e) => updatePlace(i, { stay_minutes: e.target.value ? Number(e.target.value) : null })}
+                      aria-label="체류 시간"
+                    >
+                      <option value="">체류 시간 미정</option>
+                      {p.stay_minutes != null && !STAY_OPTIONS.includes(p.stay_minutes) && (
+                        <option value={p.stay_minutes}>{formatStay(p.stay_minutes)} 체류</option>
+                      )}
+                      {STAY_OPTIONS.map((m) => <option key={m} value={m}>{formatStay(m)} 체류</option>)}
+                    </select>
+                  </div>
                   <input
                     className={styles.input}
                     value={p.memo}

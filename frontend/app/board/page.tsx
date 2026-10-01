@@ -101,6 +101,11 @@ export default function BoardPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const q = new URLSearchParams(window.location.search).get("q");
+    if (q) setSearch(q);
+  }, []);
+
+  useEffect(() => {
     setLoading(true);
     Promise.all([
       api.get<Course[]>("/api/courses?size=50&is_recruiting=false"),
