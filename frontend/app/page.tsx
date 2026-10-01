@@ -5,20 +5,12 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   RiBellLine, RiArrowRightSLine,
-  RiCompass3Line, RiMapLine, RiNewspaperLine, RiMessage2Line,
   RiHeartLine, RiMapPinLine, RiCalendarLine,
 } from "react-icons/ri";
 import { api } from "@/lib/api";
 import { authStorage, type UserResponse } from "@/lib/auth";
 import type { Course } from "@/lib/types";
 import styles from "./page.module.scss";
-
-const QUICK_MENUS = [
-  { href: "/design", icon: RiCompass3Line, label: "코스설계" },
-  { href: "/my-courses", icon: RiMapLine, label: "내 코스" },
-  { href: "/board", icon: RiNewspaperLine, label: "게시판" },
-  { href: "/chat", icon: RiMessage2Line, label: "채팅" },
-];
 
 const STYLE_COLORS: Record<string, string> = {
   휴양: "#52B788", 등산: "#2D6A4F", 해양레포츠: "#1971C2", "트레일/러닝": "#E67700",
@@ -151,16 +143,6 @@ export default function HomePage() {
             <span className={styles.statLabel}>모집중</span>
           </div>
         </div>
-      </div>
-
-      {/* Quick menu */}
-      <div className={styles.quickMenu}>
-        {QUICK_MENUS.map(({ href, icon: Icon, label }) => (
-          <Link key={href} href={href} className={styles.quickItem}>
-            <div className={styles.quickIcon}><Icon size={22} /></div>
-            <span className={styles.quickLabel}>{label}</span>
-          </Link>
-        ))}
       </div>
 
       <CourseSection

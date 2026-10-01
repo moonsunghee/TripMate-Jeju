@@ -149,49 +149,6 @@
 }
 
 // ============================================================
-// Quick menu
-// ============================================================
-.quickMenu {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
-  padding: 0 16px 4px;
-}
-
-.quickItem {
-  @include flex-column;
-  align-items: center;
-  gap: 6px;
-  padding: 14px 8px;
-  background: $color-background;
-  border-radius: $radius-xl;
-  text-decoration: none;
-  box-shadow: $shadow-sm;
-  transition: background $transition-fast;
-
-  &:active {
-    background: $color-background-gray;
-  }
-}
-
-.quickIcon {
-  width: 44px;
-  height: 44px;
-  border-radius: $radius-full;
-  background: rgba(#2D6A4F, 0.1);
-  color: $color-primary;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.quickLabel {
-  font-size: $font-size-xs;
-  font-weight: $font-weight-medium;
-  color: $color-text-secondary;
-}
-
-// ============================================================
 // Section
 // ============================================================
 .section {
