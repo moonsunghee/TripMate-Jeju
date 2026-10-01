@@ -54,6 +54,7 @@ async def enrich_place(
     return {
         "place_name":   info.get("place_name") or place_name,
         "address":      info.get("address"),
+        "road_address": info.get("road_address"),
         "phone_number": info.get("phone_number"),
         "latitude":     info.get("latitude"),
         "longitude":    info.get("longitude"),
@@ -84,6 +85,7 @@ def _search_db(
     return {
         "place_name":   place.place_name,
         "address":      place.address,
+        "road_address": place.road_address,
         "phone_number": place.phone_number,
         "latitude":     place.latitude,
         "longitude":    place.longitude,
@@ -117,6 +119,7 @@ async def enrich_places_bulk(
         enriched.append({
             **item,
             "address":      extra.get("address"),
+            "road_address": extra.get("road_address"),
             "phone_number": extra.get("phone_number"),
             "latitude":     extra.get("latitude"),
             "longitude":    extra.get("longitude"),

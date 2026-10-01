@@ -48,6 +48,9 @@ class CoursePlace(Base):
     place_name = Column(String, nullable=True)
     category = Column(String, nullable=True)
     time = Column(String, nullable=True)           # 예: "09:00"
+    stay_minutes = Column(Integer, nullable=True)  # 체류 시간(분)
+    address = Column(String, nullable=True)        # 지번(일반) 주소
+    road_address = Column(String, nullable=True)   # 도로명 주소
     memo = Column(Text, nullable=True)
 
     course = relationship("Course", back_populates="course_places")
@@ -56,6 +59,14 @@ class CoursePlace(Base):
     @property
     def place_image(self):
         return self.place.place_image if self.place else None
+
+    @property
+    def display_address(self):
+        return self.address or (self.place.address if self.place else None)
+
+    @property
+    def display_road_address(self):
+        return self.road_address or (self.place.road_address if self.place else None)
 
 
 class CourseLike(Base):

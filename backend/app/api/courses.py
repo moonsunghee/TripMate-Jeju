@@ -79,7 +79,11 @@ def recommended_courses(
     return (
         db.query(Course)
         .outerjoin(recent_likes, recent_likes.c.course_id == Course.id)
-        .filter(Course.is_shared == True, Course.user_id != current_user.id)  # noqa: E712
+        .filter(
+            Course.is_shared == True,  # noqa: E712
+            Course.user_id != current_user.id,
+            Course.status.in_(["sharing", "recruiting"]),
+        )
         .order_by(func.coalesce(recent_likes.c.cnt, 0).desc(), Course.created_at.desc())
         .limit(size)
         .all()
@@ -125,16 +129,7 @@ def create_course(
     db.flush()
 
     for p in body.places:
-        db.add(CoursePlace(
-            course_id=course.id,
-            place_id=p.place_id,
-            visit_order=p.visit_order,
-            day=p.day,
-            place_name=p.place_name,
-            category=p.category,
-            time=p.time,
-            memo=p.memo,
-        ))
+        db.add(CoursePlace(course_id=course.id, **p.model_dump()))
 
     db.commit()
     db.refresh(course)
@@ -244,16 +239,7 @@ def update_course(
     if body.places is not None:
         db.query(CoursePlace).filter(CoursePlace.course_id == course_id).delete()
         for p in body.places:
-            db.add(CoursePlace(
-                course_id=course_id,
-                place_id=p.place_id,
-                visit_order=p.visit_order,
-                day=p.day,
-                place_name=p.place_name,
-                category=p.category,
-                time=p.time,
-                memo=p.memo,
-            ))
+            db.add(CoursePlace(course_id=course_id, **p.model_dump()))
 
     db.commit()
     db.refresh(course)

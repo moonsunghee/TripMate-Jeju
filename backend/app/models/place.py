@@ -12,7 +12,8 @@ class Place(Base):
     # restaurant / tourist / accommodation / dessert / nightfood
     category = Column(String, nullable=False)
     region = Column(String, nullable=True)
-    address = Column(String, nullable=True)
+    address = Column(String, nullable=True)        # 지번(일반) 주소
+    road_address = Column(String, nullable=True)   # 도로명 주소
     phone_number = Column(String, nullable=True)
     place_image = Column(String, nullable=True)
     latitude = Column(Float, nullable=True)

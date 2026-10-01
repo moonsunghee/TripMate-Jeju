@@ -15,6 +15,7 @@ from app.services.kakao_local import search_place
 class KakaoPlaceResult(BaseModel):
     place_name: Optional[str] = None
     address: Optional[str] = None
+    road_address: Optional[str] = None
     phone_number: Optional[str] = None
     latitude: Optional[float] = None
     longitude: Optional[float] = None
