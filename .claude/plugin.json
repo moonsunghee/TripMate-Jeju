@@ -5,7 +5,12 @@
   "skills": [
     "skills/dev",
     "skills/check",
-    "skills/deploy"
+    "skills/deploy",
+    "skills/tourapi",
+    "skills/webapp-testing",
+    "skills/frontend-design",
+    "skills/impeccable",
+    "skills/emil-design-eng"
   ],
   "agents": [
     "agents/code-reviewer",
