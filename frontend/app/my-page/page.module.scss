@@ -1,0 +1,217 @@
+@import "../../styles/variables";
+@import "../../styles/mixins";
+
+.page {
+  @include flex-column;
+  background: $color-background-gray;
+  min-height: 100%;
+}
+
+// ============================================================
+// Header
+// ============================================================
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 8px;
+  height: $header-height;
+  background: $color-background;
+  border-bottom: 1px solid $color-border-light;
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: $z-index-header;
+}
+
+.backBtn {
+  @include button-reset;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: $color-text;
+  cursor: pointer;
+}
+
+.headerTitle {
+  font-size: $font-size-base;
+  font-weight: $font-weight-bold;
+  color: $color-text;
+  margin: 0;
+}
+
+.headerSpacer {
+  width: 40px;
+}
+
+// ============================================================
+// Profile card
+// ============================================================
+.profileCard {
+  margin: 16px;
+  background: $color-background;
+  border-radius: $radius-xl;
+  padding: 24px 20px 20px;
+  box-shadow: $shadow-sm;
+  @include flex-column;
+  align-items: center;
+  gap: 4px;
+}
+
+.avatar {
+  width: 72px;
+  height: 72px;
+  margin-bottom: 8px;
+  border-radius: $radius-full;
+  background: linear-gradient(135deg, $color-primary, $color-primary-light);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  font-weight: $font-weight-bold;
+}
+
+.nickname {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-bold;
+  color: $color-text;
+  margin: 0;
+}
+
+.email {
+  font-size: $font-size-sm;
+  color: $color-text-muted;
+  margin: 0;
+}
+
+.bio {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  margin: 8px 0 0;
+  text-align: center;
+}
+
+.joinedAt {
+  font-size: $font-size-xs;
+  color: $color-text-muted;
+  margin: 4px 0 0;
+}
+
+.editBtn {
+  margin-top: 12px;
+  padding: 6px 16px;
+  border: 1px solid $color-border;
+  border-radius: $radius-full;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $color-text-secondary;
+  text-decoration: none;
+
+  &:active {
+    background: $color-background-gray;
+  }
+}
+
+.statsRow {
+  display: flex;
+  align-items: center;
+  align-self: stretch;
+  margin-top: 16px;
+  background: $color-background-gray;
+  border-radius: $radius-lg;
+  padding: 12px 0;
+}
+
+.statItem {
+  flex: 1;
+  @include flex-column;
+  align-items: center;
+  gap: 3px;
+}
+
+.statNum {
+  font-size: 20px;
+  font-weight: $font-weight-bold;
+  color: $color-primary;
+  line-height: 1;
+}
+
+.statLabel {
+  font-size: $font-size-xs;
+  color: $color-text-muted;
+}
+
+.statDivider {
+  width: 1px;
+  height: 28px;
+  background: $color-border;
+}
+
+// ============================================================
+// Menu
+// ============================================================
+.menuList {
+  list-style: none;
+  margin: 0 16px;
+  padding: 0;
+  background: $color-background;
+  border-radius: $radius-xl;
+  box-shadow: $shadow-sm;
+  overflow: hidden;
+
+  li + li {
+    border-top: 1px solid $color-border-light;
+  }
+}
+
+.menuItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  text-decoration: none;
+  color: $color-text;
+  transition: background $transition-fast;
+
+  &:active {
+    background: $color-background-gray;
+  }
+}
+
+.menuIcon {
+  color: $color-primary;
+}
+
+.menuLabel {
+  flex: 1;
+  font-size: $font-size-base;
+  font-weight: $font-weight-medium;
+}
+
+.menuArrow {
+  color: $color-text-muted;
+}
+
+.logoutBtn {
+  @include button-reset;
+  margin: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 14px;
+  background: $color-background;
+  border-radius: $radius-xl;
+  box-shadow: $shadow-sm;
+  color: $color-error;
+  font-size: $font-size-base;
+  font-weight: $font-weight-medium;
+  cursor: pointer;
+
+  &:active {
+    background: $color-background-gray;
+  }
+}

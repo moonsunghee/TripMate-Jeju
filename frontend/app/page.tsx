@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
-  RiBellLine, RiArrowRightSLine,
+  RiBellLine, RiArrowRightSLine, RiUser3Line,
   RiHeartLine, RiMapPinLine, RiCalendarLine,
 } from "react-icons/ri";
 import { api } from "@/lib/api";
@@ -111,22 +111,28 @@ export default function HomePage() {
       {/* Header */}
       <div className={styles.header}>
         <span className={styles.headerLogo}>TripMate Jeju</span>
-        <button className={styles.bellBtn}>
-          <RiBellLine size={22} />
-          <span className={styles.bellDot} />
-        </button>
+        <div className={styles.headerActions}>
+          <button className={styles.bellBtn}>
+            <RiBellLine size={22} />
+            <span className={styles.bellDot} />
+          </button>
+          <Link href="/my-page" className={styles.bellBtn} aria-label="마이페이지">
+            <RiUser3Line size={22} />
+          </Link>
+        </div>
       </div>
 
       {/* Profile card */}
       <div className={styles.profileCard}>
-        <div className={styles.profileLeft}>
+        <Link href="/my-page" className={styles.profileLeft}>
           <div className={styles.avatar}>{initial}</div>
           <div className={styles.profileInfo}>
             <p className={styles.greeting}>안녕하세요 👋</p>
             <p className={styles.nickname}>{user?.nickname ?? "..."}님</p>
             <p className={styles.email}>{user?.email ?? ""}</p>
           </div>
-        </div>
+          <RiArrowRightSLine size={20} className={styles.profileArrow} />
+        </Link>
         <div className={styles.statsRow}>
           <div className={styles.statItem}>
             <span className={styles.statNum}>{totalCount}</span>
