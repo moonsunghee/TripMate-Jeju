@@ -62,17 +62,15 @@
 
 ---
 
-## 4단계 — 백엔드 배포 (Railway)
+## 4단계 — 백엔드 배포 (NAS)
 
-> 자세한 내용: [BACKEND_DEPLOY.md](./BACKEND_DEPLOY.md)
+> 상용화 전까지 집 Synology NAS에서 운영 (Docker + Cloudflare Tunnel → https://api.tripmate-jeju.com)
 
-- [ ] Railway 가입 → GitHub 연결
-- [ ] New Project → `backend` 폴더 선택
-- [ ] PostgreSQL 플러그인 추가
-- [ ] 환경변수 입력 (SECRET_KEY, API 키 전체)
-- [ ] `requirements.txt`에 `psycopg2-binary` 추가 후 재배포
-- [ ] 각 소셜 로그인 콘솔에 Railway 도메인 Redirect URI 등록
-- [ ] 배포 완료 확인 (`/docs` 접속 테스트)
+- [x] NAS PostgreSQL 컨테이너 + SQLite 데이터 이전
+- [x] 백엔드 Docker 이미지 빌드 및 실행 (`backend/Dockerfile`)
+- [x] Cloudflare Tunnel로 `api.tripmate-jeju.com` 공개
+- [x] Vercel `NEXT_PUBLIC_API_URL`을 NAS 주소로 변경
+- [ ] 각 소셜 로그인 콘솔에 `api.tripmate-jeju.com` Redirect URI 등록
 
 ---
 
@@ -91,7 +89,7 @@
 - [ ] Flutter 프로젝트 초기화 (`mobile/` 폴더)
 - [ ] 앱 패키지명 설정 (`com.yourname.tripmatejeju`)
 - [ ] 카카오 개발자 콘솔에 Android / iOS 플랫폼 등록
-- [ ] API base URL을 Railway 도메인으로 설정
+- [ ] API base URL을 `https://api.tripmate-jeju.com`으로 설정
 - [ ] 전체 화면 Flutter로 구현
 - [ ] **Apple 로그인 추가** (App Store 필수 요건)
 - [ ] 카카오맵 Flutter 패키지 연동
@@ -124,7 +122,6 @@
 | 문서 | 내용 |
 |------|------|
 | [PLANNING.md](./PLANNING.md) | 전체 기획서, ERD, 소셜 로그인 가이드 |
-| [BACKEND_DEPLOY.md](./BACKEND_DEPLOY.md) | Railway 배포 단계별 가이드 |
 | [KAKAO_MAP_AUTH.md](./KAKAO_MAP_AUTH.md) | 카카오맵 인증 환경별 설정 가이드 |
 | [Figma 화면설계](https://www.figma.com/design/pbsesQKBVQDuALbe7dtI0g) | UI/UX 디자인 |
 | [Figma Flow/ERD](https://www.figma.com/board/MyBsmYRbq6SMxe7LTKtbDS) | 플로우 차트 |

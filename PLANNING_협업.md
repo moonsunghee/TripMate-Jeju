@@ -40,7 +40,7 @@ TripMate-Jeju는 AI가 여행 조건(목적·지역·기간·식사·관광 횟�
 | AI 코스 생성 | OpenAI GPT-4o-mini (키 미설정 시 샘플 데이터 반환) |
 | 인증 | JWT + Kakao / Naver / Google OAuth 2.0 |
 | 실시간 채팅 | WebSocket |
-| 배포 | Vercel (프론트) + Railway (백엔드) |
+| 배포 | Vercel (프론트) + NAS Docker + Cloudflare Tunnel (백엔드) |
 | 패키지 매니저 | **npm** (bun, yarn 사용 금지) |
 
 ### 예정 (2단계) — 협의 중
@@ -62,7 +62,7 @@ Browser (모바일 430px 기준)
   └── Next.js 15 (Vercel)
         ├── app/             — App Router (route = 폴더)
         ├── components/      — 공통 UI 컴포넌트
-        ├── lib/api.ts ─────► FastAPI (Railway / localhost:8000)
+        ├── lib/api.ts ─────► FastAPI (NAS / localhost:8000)
         ├── lib/auth.ts            ├── routers/   — domain별 분리
         └── lib/types.ts           ├── models.py  — SQLAlchemy ORM
                                    ├── schemas.py — Pydantic
@@ -158,7 +158,7 @@ TripMate-Jeju/
 │       ├── _variables.scss    — 색상, 폰트, spacing 변수
 │       └── _mixins.scss       — 반응형, flexbox, card 믹스인
 │
-└── backend/                   — FastAPI (Railway 배포)
+└── backend/                   — FastAPI (NAS Docker 배포)
     ├── main.py                — 앱 진입점, CORS, 라우터 등록
     ├── models.py              — SQLAlchemy ORM 모델
     ├── schemas.py             — Pydantic 요청/응답 스키마
@@ -277,7 +277,7 @@ GOOGLE_CLIENT_SECRET=
 |---|-----------|------|------|
 | C-1 | 프로젝트 셋업 | 레포 생성, 폴더 구조, 개발 환경 통일 | |
 | C-2 | DB 설계 확정 | ERD 리뷰 및 최종 확정 | |
-| C-3 | 배포 환경 구성 | Vercel (프론트) + Railway (백엔드) 연결 | |
+| C-3 | 배포 환경 구성 | Vercel (프론트) + NAS Docker + Cloudflare Tunnel (백엔드) 연결 | |
 | C-4 | API 문서화 | Swagger 또는 Notion으로 엔드포인트 정리 | |
 
 ### 백엔드 (FastAPI)

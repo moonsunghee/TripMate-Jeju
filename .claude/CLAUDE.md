@@ -3,7 +3,7 @@
 ## 기술 스택
 - Frontend: Next.js 15 + TypeScript + SCSS + shadcn/ui
 - Backend: FastAPI + SQLite (port 8000), venv at `backend/.venv`
-- Deploy: Vercel (프론트) + Railway (백엔드) — https://tm-jeju.vercel.app
+- Deploy: Vercel (프론트) + NAS Docker + Cloudflare Tunnel (백엔드, https://api.tripmate-jeju.com) — https://tm-jeju.vercel.app
 - Package manager: **npm** (bun, yarn 사용 금지)
 
 ---
@@ -16,7 +16,7 @@ Browser (mobile 430px)
   └── Next.js 15 (Vercel)
         ├── app/ (App Router, page.tsx per route)
         ├── components/ (공통 UI)
-        ├── lib/api.ts ──────────────► FastAPI (Railway / localhost:8000)
+        ├── lib/api.ts ──────────────► FastAPI (NAS / localhost:8000)
         ├── lib/auth.ts (JWT 관리)         ├── routers/ (domain별 분리)
         └── lib/types.ts (공유 타입)        ├── models.py (SQLAlchemy ORM)
                                            ├── schemas.py (Pydantic)
@@ -105,7 +105,7 @@ TripMate-Jeju/
 │   │   └── _mixins.scss       # 반응형, flexbox, card 등 믹스인
 │   └── .env.local             # NEXT_PUBLIC_API_URL (커밋 금지)
 │
-├── backend/                   # FastAPI (Railway 배포)
+├── backend/                   # FastAPI (NAS Docker 배포)
 │   ├── main.py                # FastAPI 앱 진입점, CORS, 라우터 등록
 │   ├── models.py              # SQLAlchemy ORM 모델
 │   ├── schemas.py             # Pydantic 요청/응답 스키마

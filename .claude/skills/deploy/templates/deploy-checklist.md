@@ -7,7 +7,7 @@
 
 ## 환경 설정
 - [ ] Vercel 대시보드에 환경 변수 설정됨
-  - `NEXT_PUBLIC_API_URL` → Railway 백엔드 URL
+  - `NEXT_PUBLIC_API_URL` → `https://api.tripmate-jeju.com`
 - [ ] backend/main.py CORS에 Vercel URL 포함됨
 
 ## 기능 검증 (배포 후)
@@ -20,4 +20,4 @@
 ## 배포 정보
 - URL: https://tm-jeju.vercel.app
 - 플랫폼: Vercel (프론트엔드)
-- 백엔드: Railway (별도 배포)
+- 백엔드: NAS Docker + Cloudflare Tunnel (별도 배포)

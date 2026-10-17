@@ -20,4 +20,4 @@ cd frontend && vercel --prod
 
 ## 4단계: 배포 후 검증
 - 배포 URL에서 로그인 → 코스 생성 플로우 확인 요청
-- CORS 오류 없는지 확인 (프론트 ↔ Railway 백엔드)
+- CORS 오류 없는지 확인 (프론트 ↔ NAS 백엔드)
