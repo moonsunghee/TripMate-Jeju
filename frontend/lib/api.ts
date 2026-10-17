@@ -6,6 +6,19 @@ class ApiError extends Error {
   }
 }
 
+// FastAPI 422는 detail이 [{msg, ...}] 배열 — 백엔드 커스텀 검증 메시지("Value error, ...")만 한국어라 그것만 노출
+function errorMessage(detail: unknown): string {
+  if (typeof detail === "string") return detail;
+  if (Array.isArray(detail)) {
+    const msg: unknown = detail[0]?.msg;
+    if (typeof msg === "string" && msg.startsWith("Value error, ")) {
+      return msg.slice("Value error, ".length);
+    }
+    return "입력값을 확인해 주세요.";
+  }
+  return "요청에 실패했습니다.";
+}
+
 async function request<T>(path: string, options?: RequestInit): Promise<T | null> {
   const token =
     typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
@@ -28,7 +41,7 @@ async function request<T>(path: string, options?: RequestInit): Promise<T | null
       window.location.href = "/login";
       return null;
     }
-    throw new ApiError(res.status, body.detail ?? "요청에 실패했습니다.");
+    throw new ApiError(res.status, errorMessage(body.detail));
   }
 
   if (res.status === 204) return null;
